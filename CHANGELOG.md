@@ -2,6 +2,65 @@
 
 All notable changes to the Tab Scheduler Chrome Extension.
 
+## [1.2.0] - 2026-02-01
+
+### Added - Grouped Tabs
+
+- **Smart Window Management for Multiple Scheduled Tabs**
+  - Single tab opens: Opens in new window (existing behavior)
+  - Multiple tabs open together: All open in ONE window, grouped as "Snoozed"
+  - Works for both:
+    - Tabs that fire while Chrome is running (batched within 2 seconds)
+    - Past-due tabs when browser restarts
+  - Group named "Snoozed" with blue color for easy identification
+  - Prevents multiple windows from opening
+
+### Changed
+
+- Enhanced alarm listener with batching logic
+  - Alarms firing within 2 seconds are grouped together
+  - New queue system with `pendingAlarms` and `batchTimeout`
+  - New `processPendingAlarms()` function for batch processing
+- Refactored reconciliation logic in background.js
+  - New `reopenPastDueTabs()` function for past-due tabs
+  - Collects all past-due tabs before reopening
+  - Handles single vs multiple tabs differently
+- Updated notifications
+  - Single: "Tab Reopened: [title]"
+  - Multiple: "Reopened X tabs in one window"
+
+### Technical
+
+- Added `tabGroups` permission to manifest.json
+- New batching mechanism in alarm listener:
+  - `pendingAlarms[]` - Queue for alarms firing close together
+  - `batchTimeout` - 2-second delay to collect alarms
+  - `processPendingAlarms()` - Batch processor for queued alarms
+- New function for past-due tabs:
+  - `reopenPastDueTabs(pastDueTabs, scheduledTabs)` - Handles startup reconciliation
+- Enhanced reconciliation logic:
+  - Collects past-due tabs into array
+  - Batch processes for grouping
+  - Fallback to individual windows if grouping fails
+- Uses Chrome Tab Groups API:
+  - `chrome.tabs.group()` to create group
+  - `chrome.tabGroups.update()` to set name and color
+
+### User Experience Improvements
+
+- **Better missed schedule handling**: No more 10 windows opening if you missed 10 tabs
+- **Visual organization**: Grouped tabs are clearly marked as "Snoozed"
+- **Cleaner workspace**: One window with organized tabs vs. multiple scattered windows
+
+### Backwards Compatibility
+
+- ✅ Single missed tab behavior unchanged
+- ✅ All existing functionality preserved
+- ✅ Storage format unchanged
+- ✅ No breaking changes
+
+---
+
 ## [1.1.0] - 2026-02-01
 
 ### Added - Smart Scheduling

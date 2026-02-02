@@ -7,6 +7,7 @@ A Chrome extension that allows you to schedule tabs to reopen at a specific date
 - 📅 Schedule any tab to reopen at a future date/time
 - ⚡ **Smart Scheduling**: Quick buttons for "Tomorrow 9am", "In 1 hour", "Next Monday", etc.
 - 🗓️ **Calendar Picker**: Visual date/time picker for custom scheduling
+- 📂 **Grouped Tabs**: Multiple tabs opening together (within 2 seconds) open in one window, grouped as "Snoozed"
 - 🔔 Desktop notifications when tabs are scheduled and reopened
 - 📋 View and manage all scheduled tabs
 - 💾 Persists across browser restarts
