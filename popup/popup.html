@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Scheduler</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Tab Scheduler</h1>
+    </div>
+
+    <!-- Current Tab Display -->
+    <div class="current-tab" id="currentTab">
+      <img id="tabFavicon" src="" alt="" class="favicon">
+      <div class="tab-info">
+        <div id="tabTitle" class="tab-title">Loading...</div>
+        <div id="tabUrl" class="tab-url">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Scheduling Form -->
+    <div class="schedule-form">
+      <label for="scheduleTime" class="form-label">Schedule for:</label>
+      <input type="datetime-local" id="scheduleTime" class="datetime-input" required>
+
+      <div id="errorMessage" class="error-message"></div>
+
+      <button id="scheduleButton" class="btn btn-primary">
+        Schedule & Close Tab
+      </button>
+    </div>
+
+    <!-- Scheduled Tabs List -->
+    <div class="scheduled-section">
+      <h2 class="section-title">Scheduled Tabs</h2>
+      <div id="scheduledList" class="scheduled-list">
+        <div class="empty-state">No scheduled tabs</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
