@@ -71,6 +71,53 @@ body {
   white-space: nowrap;
 }
 
+/* Quick Schedule Section */
+.quick-schedule-section {
+  padding: 16px;
+  border-bottom: 1px solid #e8eaed;
+  background-color: #f8f9fa;
+}
+
+.quick-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-quick {
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a73e8;
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  text-align: center;
+}
+
+.btn-quick:hover {
+  background-color: #e8f0fe;
+  border-color: #1a73e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-quick:active {
+  background-color: #d2e3fc;
+  transform: scale(0.98);
+}
+
+.btn-quick:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+  border-color: #e8eaed;
+  color: #80868b;
+}
+
 /* Scheduling Form */
 .schedule-form {
   padding: 16px;
@@ -82,21 +129,41 @@ body {
   margin-bottom: 8px;
   font-weight: 500;
   color: #5f6368;
+  font-size: 13px;
+}
+
+.datetime-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .datetime-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 40px 10px 12px;
   font-size: 14px;
   border: 1px solid #dadce0;
   border-radius: 4px;
   outline: none;
   transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.datetime-input:hover {
+  border-color: #bdc1c6;
 }
 
 .datetime-input:focus {
   border-color: #1a73e8;
   box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 12px;
+  font-size: 18px;
+  pointer-events: none;
+  user-select: none;
 }
 
 .error-message {

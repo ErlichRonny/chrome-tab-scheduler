@@ -22,10 +22,27 @@
       </div>
     </div>
 
-    <!-- Scheduling Form -->
+    <!-- Quick Schedule Buttons -->
+    <div class="quick-schedule-section">
+      <h2 class="section-title">Quick Schedule</h2>
+      <div class="quick-schedule-grid">
+        <button class="btn-quick" data-preset="1hour">In 1 hour</button>
+        <button class="btn-quick" data-preset="3hours">In 3 hours</button>
+        <button class="btn-quick" data-preset="tomorrow9am">Tomorrow 9am</button>
+        <button class="btn-quick" data-preset="tomorrow2pm">Tomorrow 2pm</button>
+        <button class="btn-quick" data-preset="nextMonday9am">Next Monday 9am</button>
+        <button class="btn-quick" data-preset="nextWeek">Next week</button>
+      </div>
+    </div>
+
+    <!-- Manual Scheduling Form -->
     <div class="schedule-form">
-      <label for="scheduleTime" class="form-label">Schedule for:</label>
-      <input type="datetime-local" id="scheduleTime" class="datetime-input" required>
+      <h2 class="section-title">Or Pick Custom Time</h2>
+      <label for="scheduleTime" class="form-label">Date and time:</label>
+      <div class="datetime-wrapper">
+        <input type="datetime-local" id="scheduleTime" class="datetime-input" required>
+        <span class="calendar-icon">📅</span>
+      </div>
 
       <div id="errorMessage" class="error-message"></div>
 

@@ -5,10 +5,12 @@ A Chrome extension that allows you to schedule tabs to reopen at a specific date
 ## Features
 
 - 📅 Schedule any tab to reopen at a future date/time
+- ⚡ **Smart Scheduling**: Quick buttons for "Tomorrow 9am", "In 1 hour", "Next Monday", etc.
+- 🗓️ **Calendar Picker**: Visual date/time picker for custom scheduling
 - 🔔 Desktop notifications when tabs are scheduled and reopened
 - 📋 View and manage all scheduled tabs
 - 💾 Persists across browser restarts
-- ⚡ Handles missed schedules (reopens on next browser start)
+- ⏰ Handles missed schedules (reopens on next browser start)
 - 🎯 Clean, modern UI matching Chrome's design language
 
 ## Installation
@@ -24,14 +26,31 @@ A Chrome extension that allows you to schedule tabs to reopen at a specific date
 
 ## Usage
 
-### Schedule a Tab
+### Quick Schedule (New!)
+
+The fastest way to schedule a tab:
 
 1. Navigate to any webpage you want to schedule
 2. Click the Tab Scheduler icon in your toolbar
-3. Select a future date and time using the picker
-4. Click "Schedule & Close Tab"
-5. The tab closes immediately
-6. At the scheduled time, the tab reopens as a new window
+3. Click any Quick Schedule button:
+   - **In 1 hour** / **In 3 hours** - For short-term scheduling
+   - **Tomorrow 9am** / **Tomorrow 2pm** - For next-day scheduling
+   - **Next Monday 9am** - For weekly planning
+   - **Next week** - Same time, 7 days from now
+4. The tab closes immediately and reopens at the scheduled time
+
+### Custom Schedule
+
+For specific dates and times:
+
+1. Navigate to any webpage you want to schedule
+2. Click the Tab Scheduler icon in your toolbar
+3. Scroll to "Or Pick Custom Time"
+4. Click the date/time picker (calendar icon 📅)
+5. Select your desired date and time
+6. Click "Schedule & Close Tab"
+7. The tab closes immediately
+8. At the scheduled time, the tab reopens as a new window
 
 ### View Scheduled Tabs
 

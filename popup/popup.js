@@ -20,6 +20,8 @@ async function loadCurrentTab() {
     if (isInvalidUrl(tab.url)) {
       showError('Cannot schedule system tabs (chrome://, about:, etc.)');
       document.getElementById('scheduleButton').disabled = true;
+      // Disable all quick schedule buttons
+      document.querySelectorAll('.btn-quick').forEach(btn => btn.disabled = true);
       return;
     }
 
@@ -141,6 +143,14 @@ function setupEventListeners() {
   document.getElementById('scheduleTime').addEventListener('change', () => {
     clearError();
   });
+
+  // Quick schedule buttons
+  document.querySelectorAll('.btn-quick').forEach(button => {
+    button.addEventListener('click', () => {
+      const preset = button.getAttribute('data-preset');
+      handleQuickSchedule(preset);
+    });
+  });
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -159,7 +169,64 @@ function setMinDateTime() {
   document.getElementById('scheduleTime').min = minDateTime;
 }
 
-// Schedule the current tab
+// Handle quick schedule preset
+async function handleQuickSchedule(preset) {
+  const scheduledTime = calculatePresetTime(preset);
+
+  if (!scheduledTime) {
+    showError('Invalid preset');
+    return;
+  }
+
+  await scheduleTabWithTime(scheduledTime);
+}
+
+// Calculate timestamp for preset
+function calculatePresetTime(preset) {
+  const now = new Date();
+  let targetDate = new Date();
+
+  switch (preset) {
+    case '1hour':
+      targetDate.setHours(now.getHours() + 1);
+      break;
+
+    case '3hours':
+      targetDate.setHours(now.getHours() + 3);
+      break;
+
+    case 'tomorrow9am':
+      targetDate.setDate(now.getDate() + 1);
+      targetDate.setHours(9, 0, 0, 0);
+      // If it's already past 9am today, this will be tomorrow at 9am
+      break;
+
+    case 'tomorrow2pm':
+      targetDate.setDate(now.getDate() + 1);
+      targetDate.setHours(14, 0, 0, 0);
+      break;
+
+    case 'nextMonday9am':
+      // Calculate days until next Monday
+      const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const daysUntilMonday = currentDay === 0 ? 1 : (8 - currentDay);
+      targetDate.setDate(now.getDate() + daysUntilMonday);
+      targetDate.setHours(9, 0, 0, 0);
+      break;
+
+    case 'nextWeek':
+      targetDate.setDate(now.getDate() + 7);
+      // Keep same time as now
+      break;
+
+    default:
+      return null;
+  }
+
+  return targetDate.getTime();
+}
+
+// Schedule the current tab (from manual input)
 async function scheduleTab() {
   try {
     const scheduleInput = document.getElementById('scheduleTime');
@@ -172,13 +239,26 @@ async function scheduleTab() {
     }
 
     const scheduledTime = new Date(scheduleValue).getTime();
+
+    await scheduleTabWithTime(scheduledTime);
+  } catch (error) {
+    console.error('Error scheduling tab:', error);
+    showError('Failed to schedule tab. Please try again.');
+  }
+}
+
+// Core scheduling logic (used by both manual and quick schedule)
+async function scheduleTabWithTime(scheduledTime) {
+  try {
     const now = Date.now();
 
+    // Validate time
     if (scheduledTime <= now) {
       showError('Please select a future date and time');
       return;
     }
 
+    // Validate current tab
     if (!currentTab) {
       showError('No tab selected');
       return;
