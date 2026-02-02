@@ -35,6 +35,43 @@
       </div>
     </div>
 
+    <!-- Custom Presets Section -->
+    <div class="custom-presets-section" id="customPresetsSection">
+      <h2 class="section-title">
+        My Presets
+        <button class="btn-add-preset" id="addPresetBtn" title="Add custom preset">+</button>
+      </h2>
+      <div class="custom-presets-grid" id="customPresetsGrid">
+        <div class="empty-state-presets">Click + to add your first preset</div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Preset Form -->
+    <div class="preset-form-section" id="presetFormSection" style="display: none;">
+      <h2 class="section-title">Add Custom Preset</h2>
+      <form id="presetForm">
+        <label for="presetName" class="form-label">Preset Name:</label>
+        <input type="text" id="presetName" class="preset-input" placeholder="e.g., Morning Coffee" required maxlength="20">
+
+        <label for="presetTime" class="form-label">Time:</label>
+        <input type="time" id="presetTime" class="preset-input" required>
+
+        <label for="presetDays" class="form-label">Days Ahead:</label>
+        <select id="presetDays" class="preset-input">
+          <option value="0">Today</option>
+          <option value="1" selected>Tomorrow</option>
+          <option value="2">2 days</option>
+          <option value="3">3 days</option>
+          <option value="7">1 week</option>
+        </select>
+
+        <div class="preset-form-buttons">
+          <button type="submit" class="btn btn-primary">Save Preset</button>
+          <button type="button" class="btn btn-secondary" id="cancelPresetBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
     <!-- Manual Scheduling Form -->
     <div class="schedule-form">
       <h2 class="section-title">Or Pick Custom Time</h2>
@@ -56,6 +93,18 @@
       <h2 class="section-title">Scheduled Tabs</h2>
       <div id="scheduledList" class="scheduled-list">
         <div class="empty-state">No scheduled tabs</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal" style="display: none;">
+    <div class="modal-content">
+      <h3 class="modal-title">Delete Preset?</h3>
+      <p class="modal-message">Are you sure you want to delete "<span id="presetNameToDelete"></span>"?</p>
+      <div class="modal-buttons">
+        <button class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
       </div>
     </div>
   </div>

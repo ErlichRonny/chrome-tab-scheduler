@@ -6,6 +6,7 @@ let currentTab = null;
 document.addEventListener('DOMContentLoaded', async () => {
   await loadCurrentTab();
   await loadScheduledTabs();
+  await loadCustomPresets();
   setupEventListeners();
   setMinDateTime();
 });
@@ -159,6 +160,15 @@ function setupEventListeners() {
       handleQuickSchedule(preset);
     });
   });
+
+  // Custom preset buttons
+  document.getElementById('addPresetBtn').addEventListener('click', showPresetForm);
+  document.getElementById('cancelPresetBtn').addEventListener('click', hidePresetForm);
+  document.getElementById('presetForm').addEventListener('submit', saveCustomPreset);
+
+  // Delete modal buttons
+  document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
+  document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -380,4 +390,215 @@ function clearError() {
   const errorElement = document.getElementById('errorMessage');
   errorElement.textContent = '';
   errorElement.style.display = 'none';
+}
+
+// ============================================================================
+// Custom Presets Functions
+// ============================================================================
+
+// Load and display custom presets
+async function loadCustomPresets() {
+  try {
+    const result = await chrome.storage.local.get('customPresets');
+    const customPresets = result.customPresets || [];
+
+    const grid = document.getElementById('customPresetsGrid');
+
+    // Clear existing buttons
+    grid.innerHTML = '';
+
+    if (customPresets.length === 0) {
+      // Show empty state message
+      grid.innerHTML = '<div class="empty-state-presets">Click + to add your first preset</div>';
+      return;
+    }
+
+    // Add preset buttons
+    customPresets.forEach(preset => {
+      const button = createCustomPresetButton(preset);
+      grid.appendChild(button);
+    });
+  } catch (error) {
+    console.error('Error loading custom presets:', error);
+  }
+}
+
+// Create a custom preset button element
+function createCustomPresetButton(preset) {
+  const button = document.createElement('button');
+  button.className = 'btn-custom-preset';
+  button.textContent = preset.name;
+  button.setAttribute('data-preset-id', preset.id);
+
+  // Add click handler for scheduling
+  button.addEventListener('click', () => {
+    handleCustomPresetClick(preset);
+  });
+
+  // Add delete button
+  const deleteBtn = document.createElement('span');
+  deleteBtn.className = 'delete-preset';
+  deleteBtn.textContent = '×';
+  deleteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteCustomPreset(preset.id);
+  });
+
+  button.appendChild(deleteBtn);
+  return button;
+}
+
+// Handle custom preset button click
+async function handleCustomPresetClick(preset) {
+  const scheduledTime = calculateCustomPresetTime(preset);
+  await scheduleTabWithTime(scheduledTime);
+}
+
+// Calculate scheduled time from custom preset
+function calculateCustomPresetTime(preset) {
+  const now = new Date();
+  const targetDate = new Date(now);
+
+  // Add days ahead
+  targetDate.setDate(now.getDate() + preset.daysAhead);
+
+  // Set the time
+  targetDate.setHours(preset.hour, preset.minute, 0, 0);
+
+  // If the time has already passed today and daysAhead is 0, move to tomorrow
+  if (preset.daysAhead === 0 && targetDate <= now) {
+    targetDate.setDate(targetDate.getDate() + 1);
+  }
+
+  return targetDate.getTime();
+}
+
+// Show the preset form
+function showPresetForm() {
+  document.getElementById('presetFormSection').style.display = 'block';
+  document.getElementById('presetName').focus();
+}
+
+// Hide the preset form
+function hidePresetForm() {
+  document.getElementById('presetFormSection').style.display = 'none';
+  document.getElementById('presetForm').reset();
+}
+
+// Save a new custom preset
+async function saveCustomPreset(e) {
+  e.preventDefault();
+
+  try {
+    const name = document.getElementById('presetName').value.trim();
+    const time = document.getElementById('presetTime').value;
+    const daysAhead = parseInt(document.getElementById('presetDays').value);
+
+    if (!name || !time) {
+      showError('Please fill in all fields');
+      return;
+    }
+
+    // Parse time
+    const [hour, minute] = time.split(':').map(Number);
+
+    // Create preset object
+    const preset = {
+      id: `preset_${Date.now()}`,
+      name: name,
+      hour: hour,
+      minute: minute,
+      daysAhead: daysAhead,
+      createdAt: Date.now()
+    };
+
+    // Load existing presets
+    const result = await chrome.storage.local.get('customPresets');
+    const customPresets = result.customPresets || [];
+
+    // Add new preset
+    customPresets.push(preset);
+
+    // Save to storage
+    await chrome.storage.local.set({ customPresets });
+
+    // Reload display
+    await loadCustomPresets();
+
+    // Hide form
+    hidePresetForm();
+
+    console.log('Custom preset saved:', preset);
+  } catch (error) {
+    console.error('Error saving custom preset:', error);
+    showError('Failed to save preset');
+  }
+}
+
+// Store preset ID for deletion
+let presetToDelete = null;
+
+// Delete a custom preset (shows confirmation modal)
+async function deleteCustomPreset(presetId) {
+  try {
+    // Load existing presets to get the name
+    const result = await chrome.storage.local.get('customPresets');
+    const customPresets = result.customPresets || [];
+    const preset = customPresets.find(p => p.id === presetId);
+
+    if (!preset) {
+      return;
+    }
+
+    // Store the preset ID for confirmation
+    presetToDelete = presetId;
+
+    // Show modal with preset name
+    document.getElementById('presetNameToDelete').textContent = preset.name;
+    showDeleteModal();
+  } catch (error) {
+    console.error('Error deleting custom preset:', error);
+    showError('Failed to delete preset');
+  }
+}
+
+// Show delete confirmation modal
+function showDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'flex';
+}
+
+// Hide delete confirmation modal
+function hideDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+  presetToDelete = null;
+}
+
+// Confirm deletion (called when user clicks "Delete" in modal)
+async function confirmDelete() {
+  if (!presetToDelete) {
+    return;
+  }
+
+  try {
+    // Load existing presets
+    const result = await chrome.storage.local.get('customPresets');
+    const customPresets = result.customPresets || [];
+
+    // Remove the preset
+    const updatedPresets = customPresets.filter(p => p.id !== presetToDelete);
+
+    // Save to storage
+    await chrome.storage.local.set({ customPresets: updatedPresets });
+
+    // Reload display
+    await loadCustomPresets();
+
+    // Hide modal
+    hideDeleteModal();
+
+    console.log('Custom preset deleted:', presetToDelete);
+  } catch (error) {
+    console.error('Error confirming deletion:', error);
+    showError('Failed to delete preset');
+  }
 }

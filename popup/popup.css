@@ -118,6 +118,150 @@ body {
   color: #80868b;
 }
 
+/* Custom Presets Section */
+.custom-presets-section {
+  padding: 16px;
+  border-bottom: 1px solid #e8eaed;
+  background-color: #fff;
+}
+
+.custom-presets-section .section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-add-preset {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1a73e8;
+  background-color: transparent;
+  border: 1px solid #1a73e8;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn-add-preset:hover {
+  background-color: #e8f0fe;
+}
+
+.btn-add-preset:active {
+  transform: scale(0.9);
+}
+
+.custom-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.empty-state-presets {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 16px;
+  color: #80868b;
+  font-size: 13px;
+}
+
+.btn-custom-preset {
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a73e8;
+  background-color: #e8f0fe;
+  border: 1px solid #1a73e8;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  text-align: center;
+  position: relative;
+}
+
+.btn-custom-preset:hover {
+  background-color: #d2e3fc;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-custom-preset:active {
+  transform: scale(0.98);
+}
+
+.btn-custom-preset .delete-preset {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+  color: #ea4335;
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn-custom-preset:hover .delete-preset {
+  display: flex;
+}
+
+.delete-preset:hover {
+  background-color: #fce8e6;
+}
+
+/* Preset Form Section */
+.preset-form-section {
+  padding: 16px;
+  border-bottom: 1px solid #e8eaed;
+  background-color: #f8f9fa;
+}
+
+.preset-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+.preset-input:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+}
+
+.preset-form-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-secondary {
+  background-color: #fff;
+  color: #5f6368;
+  border: 1px solid #dadce0;
+}
+
+.btn-secondary:hover {
+  background-color: #f8f9fa;
+  border-color: #bdc1c6;
+}
+
 /* Scheduling Form */
 .schedule-form {
   padding: 16px;
@@ -307,4 +451,94 @@ body {
   padding: 32px 16px;
   color: #80868b;
   font-size: 13px;
+}
+
+/* Delete Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 320px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 12px 0;
+}
+
+.modal-message {
+  font-size: 14px;
+  color: #5f6368;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.modal-message span {
+  font-weight: 500;
+  color: #202124;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal-buttons .btn {
+  width: auto;
+  padding: 8px 16px;
+  margin: 0;
+}
+
+.btn-danger {
+  background-color: #ea4335;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #d33828;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.btn-danger:active {
+  background-color: #c5221f;
 }
