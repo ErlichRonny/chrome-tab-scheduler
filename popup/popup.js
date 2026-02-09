@@ -6,6 +6,7 @@ let allScheduledTabs = {}; // Store all tabs for search/filter
 // Initialize popup when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
   await loadTheme();
+  await checkFirstTimeUser();
   await loadCurrentTab();
   await loadScheduledTabs();
   await loadCustomPresets();
@@ -72,7 +73,16 @@ async function loadScheduledTabs() {
     }
 
     if (entries.length === 0) {
-      listElement.innerHTML = '<div class="empty-state">No scheduled tabs</div>';
+      listElement.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📅</div>
+          <div class="empty-state-title">No scheduled tabs yet</div>
+          <div class="empty-state-message">
+            Schedule a tab to have it reopen at a specific time.<br>
+            Use quick buttons above or press <kbd>Ctrl+Shift+S</kbd>
+          </div>
+        </div>
+      `;
       document.getElementById('searchResultsInfo').style.display = 'none';
       return;
     }
@@ -218,6 +228,19 @@ function setupEventListeners() {
 
   // Settings button
   document.getElementById('settingsBtn').addEventListener('click', openSettings);
+
+  // Onboarding
+  document.getElementById('onboardingNext').addEventListener('click', nextOnboardingSlide);
+  document.getElementById('onboardingSkip').addEventListener('click', skipOnboarding);
+  document.getElementById('onboardingDone').addEventListener('click', finishOnboarding);
+
+  // Onboarding dots
+  document.querySelectorAll('.onboarding-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      const slideNum = parseInt(dot.getAttribute('data-dot'));
+      goToOnboardingSlide(slideNum);
+    });
+  });
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -946,5 +969,86 @@ function applyTheme(theme) {
     html.setAttribute('data-theme', 'dark');
   } else {
     html.removeAttribute('data-theme');
+  }
+}
+
+// ============================================================================
+// Onboarding Functions
+// ============================================================================
+
+let currentOnboardingSlide = 1;
+const totalOnboardingSlides = 4;
+
+// Check if this is the first time the user is opening the popup
+async function checkFirstTimeUser() {
+  try {
+    const result = await chrome.storage.local.get('hasSeenOnboarding');
+    if (!result.hasSeenOnboarding) {
+      showOnboarding();
+    }
+  } catch (error) {
+    console.error('Error checking first time user:', error);
+  }
+}
+
+// Show onboarding modal
+function showOnboarding() {
+  currentOnboardingSlide = 1;
+  document.getElementById('onboardingModal').style.display = 'flex';
+  goToOnboardingSlide(1);
+}
+
+// Navigate to specific slide
+function goToOnboardingSlide(slideNum) {
+  currentOnboardingSlide = slideNum;
+
+  // Hide all slides
+  document.querySelectorAll('.onboarding-slide').forEach(slide => {
+    slide.style.display = 'none';
+  });
+
+  // Show current slide
+  const currentSlide = document.querySelector(`.onboarding-slide[data-slide="${slideNum}"]`);
+  if (currentSlide) {
+    currentSlide.style.display = 'block';
+  }
+
+  // Update dots
+  document.querySelectorAll('.onboarding-dot').forEach(dot => {
+    dot.classList.remove('active');
+    if (parseInt(dot.getAttribute('data-dot')) === slideNum) {
+      dot.classList.add('active');
+    }
+  });
+
+  // Update buttons
+  if (slideNum === totalOnboardingSlides) {
+    document.getElementById('onboardingNext').style.display = 'none';
+    document.getElementById('onboardingDone').style.display = 'block';
+  } else {
+    document.getElementById('onboardingNext').style.display = 'block';
+    document.getElementById('onboardingDone').style.display = 'none';
+  }
+}
+
+// Next slide
+function nextOnboardingSlide() {
+  if (currentOnboardingSlide < totalOnboardingSlides) {
+    goToOnboardingSlide(currentOnboardingSlide + 1);
+  }
+}
+
+// Skip onboarding
+async function skipOnboarding() {
+  await finishOnboarding();
+}
+
+// Finish onboarding
+async function finishOnboarding() {
+  try {
+    await chrome.storage.local.set({ hasSeenOnboarding: true });
+    document.getElementById('onboardingModal').style.display = 'none';
+  } catch (error) {
+    console.error('Error finishing onboarding:', error);
   }
 }

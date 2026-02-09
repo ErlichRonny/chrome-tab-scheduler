@@ -310,9 +310,18 @@ body {
 .empty-state-presets {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 16px;
-  color: var(--text-tertiary);
+  padding: 24px 16px;
+  color: var(--text-secondary);
   font-size: 13px;
+  animation: fadeIn 0.5s ease;
+}
+
+.empty-state-presets::before {
+  content: "⚡";
+  display: block;
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.5;
 }
 
 .btn-custom-preset {
@@ -634,11 +643,14 @@ body {
   background-color: var(--bg-secondary);
   border-radius: 8px;
   border: 1px solid var(--border-light);
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.3s ease;
 }
 
 .scheduled-item:hover {
   background-color: var(--bg-tertiary);
+  transform: translateX(2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .scheduled-info {
@@ -663,9 +675,46 @@ body {
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 32px 16px;
-  color: var(--text-tertiary);
+  padding: 40px 24px;
+  animation: fadeIn 0.5s ease;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.empty-state-message {
   font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.empty-state-cta {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.empty-state-cta:hover {
+  background-color: var(--primary-lighter);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Delete Confirmation Modal */
@@ -689,6 +738,37 @@ body {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
   }
 }
 
@@ -855,4 +935,121 @@ body {
   text-align: center;
   margin: 16px 0 8px 0;
   font-style: italic;
+}
+
+/* Loading Spinner */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-light);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-secondary);
+  gap: 12px;
+}
+
+/* Onboarding Modal */
+.onboarding-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.onboarding-content {
+  width: 450px;
+  max-width: 90vw;
+  padding: 40px 32px 24px;
+}
+
+.onboarding-slide {
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.onboarding-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.onboarding-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.onboarding-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.onboarding-text kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.onboarding-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.onboarding-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.onboarding-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--border-medium);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.onboarding-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background-color: var(--primary-color);
+}
+
+.onboarding-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.onboarding-buttons .btn {
+  flex: 1;
+  margin: 0;
 }

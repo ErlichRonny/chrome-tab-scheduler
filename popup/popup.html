@@ -146,6 +146,67 @@
     </div>
   </div>
 
+  <!-- Onboarding Modal -->
+  <div class="modal-overlay onboarding-overlay" id="onboardingModal" style="display: none;">
+    <div class="modal-content onboarding-content">
+      <!-- Slide 1 -->
+      <div class="onboarding-slide" data-slide="1">
+        <div class="onboarding-icon">🎉</div>
+        <h2 class="onboarding-title">Welcome to Tab Scheduler!</h2>
+        <p class="onboarding-text">
+          Schedule tabs to reopen at any time. Perfect for managing your reading list,
+          reminders, and staying organized.
+        </p>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="onboarding-slide" data-slide="2" style="display: none;">
+        <div class="onboarding-icon">⚡</div>
+        <h2 class="onboarding-title">Quick Scheduling</h2>
+        <p class="onboarding-text">
+          Use the quick buttons for common times like "Tomorrow 9am" or "In 3 hours".
+          Or press <kbd>Ctrl+Shift+S</kbd> to schedule instantly!
+        </p>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="onboarding-slide" data-slide="3" style="display: none;">
+        <div class="onboarding-icon">⌨️</div>
+        <h2 class="onboarding-title">Keyboard Shortcuts</h2>
+        <p class="onboarding-text">
+          <strong>Ctrl+Shift+.</strong> - Open popup<br>
+          <strong>Ctrl+Shift+S</strong> - Schedule for tomorrow 9am<br>
+          <strong>Ctrl+Shift+L</strong> - Schedule for 3 hours later
+        </p>
+      </div>
+
+      <!-- Slide 4 -->
+      <div class="onboarding-slide" data-slide="4" style="display: none;">
+        <div class="onboarding-icon">⚙️</div>
+        <h2 class="onboarding-title">Customize Everything</h2>
+        <p class="onboarding-text">
+          Click the gear icon to customize themes, notifications, batch tab settings,
+          and more. Make it yours!
+        </p>
+      </div>
+
+      <!-- Navigation -->
+      <div class="onboarding-nav">
+        <div class="onboarding-dots">
+          <span class="onboarding-dot active" data-dot="1"></span>
+          <span class="onboarding-dot" data-dot="2"></span>
+          <span class="onboarding-dot" data-dot="3"></span>
+          <span class="onboarding-dot" data-dot="4"></span>
+        </div>
+        <div class="onboarding-buttons">
+          <button class="btn btn-secondary" id="onboardingSkip">Skip</button>
+          <button class="btn btn-primary" id="onboardingNext">Next</button>
+          <button class="btn btn-primary" id="onboardingDone" style="display: none;">Get Started</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Keyboard Shortcuts Help Modal -->
   <div class="modal-overlay" id="keyboardHelpModal" style="display: none;">
     <div class="modal-content modal-keyboard-help">
