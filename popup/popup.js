@@ -2,6 +2,8 @@
 
 let currentTab = null;
 let allScheduledTabs = {}; // Store all tabs for search/filter
+let lastScheduledAction = null; // Store last action for undo
+let undoTimeout = null; // Timeout for hiding undo toast
 
 // Initialize popup when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
@@ -241,6 +243,9 @@ function setupEventListeners() {
       goToOnboardingSlide(slideNum);
     });
   });
+
+  // Undo button
+  document.getElementById('undoButton').addEventListener('click', undoSchedule);
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -398,20 +403,24 @@ async function scheduleTabWithTime(scheduledTime) {
           throw new Error(response?.error || 'Failed to schedule tab');
         }
 
+        // Store info for undo
+        lastScheduledAction = {
+          alarmId: alarmId,
+          tabData: tabData,
+          tabId: currentTab.id
+        };
+
         // Close current tab
         await chrome.tabs.remove(currentTab.id);
 
-        // Show success notification (non-blocking)
-        chrome.notifications.create({
-          type: 'basic',
-          iconUrl: 'icons/icon48.png',
-          title: 'Tab Scheduled',
-          message: `Tab will reopen ${formatScheduledTime(scheduledTime)}`,
-          priority: 1
-        }).catch(err => console.warn('Notification failed:', err));
+        // Show undo toast
+        showUndoToast(`Tab scheduled for ${formatScheduledTime(scheduledTime)}`);
 
-        // Close popup (tab is already closed)
-        window.close();
+        // Close popup after 5 seconds (giving time to undo)
+        setTimeout(() => {
+          window.close();
+        }, 5000);
+
       } catch (error) {
         console.error('Error scheduling tab:', error);
         console.error('Error stack:', error.stack);
@@ -1050,5 +1059,99 @@ async function finishOnboarding() {
     document.getElementById('onboardingModal').style.display = 'none';
   } catch (error) {
     console.error('Error finishing onboarding:', error);
+  }
+}
+
+// ============================================================================
+// Undo Functionality
+// ============================================================================
+
+// Show undo toast notification
+function showUndoToast(message) {
+  const toast = document.getElementById('undoToast');
+  const messageEl = document.getElementById('undoToastMessage');
+  const progressEl = document.getElementById('undoProgress');
+
+  messageEl.textContent = message;
+  toast.style.display = 'block';
+
+  // Reset progress bar animation
+  progressEl.style.animation = 'none';
+  setTimeout(() => {
+    progressEl.style.animation = 'progressBar 5s linear';
+  }, 10);
+
+  // Clear existing timeout
+  if (undoTimeout) {
+    clearTimeout(undoTimeout);
+  }
+
+  // Hide toast after 5 seconds
+  undoTimeout = setTimeout(() => {
+    hideUndoToast();
+    lastScheduledAction = null; // Clear after timeout
+  }, 5000);
+}
+
+// Hide undo toast
+function hideUndoToast() {
+  document.getElementById('undoToast').style.display = 'none';
+}
+
+// Undo the last scheduling action
+async function undoSchedule() {
+  if (!lastScheduledAction) {
+    console.warn('No action to undo');
+    return;
+  }
+
+  try {
+    const { alarmId, tabData } = lastScheduledAction;
+
+    // Send message to background to cancel the schedule
+    const response = await new Promise((resolve) => {
+      chrome.runtime.sendMessage({
+        action: 'cancelSchedule',
+        alarmId: alarmId
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('Runtime error:', chrome.runtime.lastError);
+          resolve({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          resolve(response);
+        }
+      });
+    });
+
+    if (!response || !response.success) {
+      throw new Error(response?.error || 'Failed to undo');
+    }
+
+    // Reopen the tab
+    await chrome.tabs.create({
+      url: tabData.tabInfo.url,
+      active: true
+    });
+
+    // Hide toast
+    hideUndoToast();
+    clearTimeout(undoTimeout);
+
+    // Clear the action
+    lastScheduledAction = null;
+
+    // Show success message
+    const messageEl = document.getElementById('undoToastMessage');
+    messageEl.textContent = 'Schedule cancelled, tab reopened';
+    document.getElementById('undoToast').style.display = 'block';
+
+    setTimeout(() => {
+      hideUndoToast();
+      window.close();
+    }, 2000);
+
+  } catch (error) {
+    console.error('Error undoing schedule:', error);
+    showError('Failed to undo: ' + error.message);
   }
 }

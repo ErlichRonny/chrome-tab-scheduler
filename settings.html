@@ -108,6 +108,30 @@
       </div>
     </section>
 
+    <!-- Import/Export -->
+    <section class="settings-section">
+      <h2 class="section-title">Backup & Restore</h2>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label>Export Scheduled Tabs</label>
+          <p class="setting-description">Download all scheduled tabs as a JSON file for backup</p>
+        </div>
+        <button class="btn btn-primary" id="exportBtn">Export</button>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label>Import Scheduled Tabs</label>
+          <p class="setting-description">Restore scheduled tabs from a backup file</p>
+        </div>
+        <div class="import-controls">
+          <input type="file" id="importFile" accept=".json" style="display: none;">
+          <button class="btn btn-secondary" id="importBtn">Import</button>
+        </div>
+      </div>
+    </section>
+
     <!-- Danger Zone -->
     <section class="settings-section danger-section">
       <h2 class="section-title">Danger Zone</h2>

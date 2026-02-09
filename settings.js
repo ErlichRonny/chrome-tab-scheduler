@@ -69,6 +69,13 @@ function setupEventListeners() {
   // Danger zone
   document.getElementById('clearAllBtn').addEventListener('click', clearAllScheduledTabs);
   document.getElementById('resetSettingsBtn').addEventListener('click', resetSettings);
+
+  // Import/Export
+  document.getElementById('exportBtn').addEventListener('click', exportScheduledTabs);
+  document.getElementById('importBtn').addEventListener('click', () => {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', importScheduledTabs);
 }
 
 // Save settings
@@ -186,4 +193,151 @@ function showSaveStatus(message, isError = false) {
 function displayVersion() {
   const manifest = chrome.runtime.getManifest();
   document.getElementById('versionInfo').textContent = manifest.version;
+}
+
+// ============================================================================
+// Import/Export Functions
+// ============================================================================
+
+// Export scheduled tabs to JSON file
+async function exportScheduledTabs() {
+  try {
+    const result = await chrome.storage.local.get(['scheduledTabs', 'settings', 'customPresets']);
+    
+    const exportData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      scheduledTabs: result.scheduledTabs || {},
+      settings: result.settings || {},
+      customPresets: result.customPresets || []
+    };
+
+    const count = Object.keys(exportData.scheduledTabs).length;
+
+    if (count === 0) {
+      showSaveStatus('No scheduled tabs to export');
+      return;
+    }
+
+    // Create JSON blob
+    const json = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create download link
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tab-scheduler-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showSaveStatus(`Exported ${count} scheduled tab${count !== 1 ? 's' : ''}`);
+
+  } catch (error) {
+    console.error('Error exporting:', error);
+    showSaveStatus('Error exporting tabs', true);
+  }
+}
+
+// Import scheduled tabs from JSON file
+async function importScheduledTabs(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const importData = JSON.parse(text);
+
+    // Validate structure
+    if (!importData.scheduledTabs) {
+      throw new Error('Invalid backup file format');
+    }
+
+    // Show confirmation
+    const count = Object.keys(importData.scheduledTabs).length;
+    const confirmed = confirm(
+      `Import ${count} scheduled tab${count !== 1 ? 's' : ''}?\n\n` +
+      `This will ADD to your existing scheduled tabs (not replace them).`
+    );
+
+    if (!confirmed) {
+      event.target.value = ''; // Clear file input
+      return;
+    }
+
+    // Get existing data
+    const result = await chrome.storage.local.get('scheduledTabs');
+    const existingTabs = result.scheduledTabs || {};
+
+    // Merge imported tabs with existing tabs
+    const mergedTabs = { ...existingTabs };
+    let imported = 0;
+    let skipped = 0;
+
+    for (const [alarmId, tabData] of Object.entries(importData.scheduledTabs)) {
+      // Check if alarm already exists
+      if (existingTabs[alarmId]) {
+        skipped++;
+        continue;
+      }
+
+      // Only import future scheduled tabs
+      if (tabData.scheduledTime > Date.now()) {
+        mergedTabs[alarmId] = tabData;
+        
+        // Create alarm
+        await chrome.alarms.create(alarmId, { when: tabData.scheduledTime });
+        imported++;
+      } else {
+        skipped++;
+      }
+    }
+
+    // Save merged tabs
+    await chrome.storage.local.set({ scheduledTabs: mergedTabs });
+
+    // Import settings and presets if they exist
+    if (importData.settings) {
+      const settingsResult = await chrome.storage.local.get('settings');
+      const hasExistingSettings = settingsResult.settings && Object.keys(settingsResult.settings).length > 0;
+      
+      if (!hasExistingSettings) {
+        await chrome.storage.local.set({ settings: importData.settings });
+      }
+    }
+
+    if (importData.customPresets && importData.customPresets.length > 0) {
+      const presetsResult = await chrome.storage.local.get('customPresets');
+      const existingPresets = presetsResult.customPresets || [];
+      
+      // Merge presets, avoiding duplicates by ID
+      const existingIds = new Set(existingPresets.map(p => p.id));
+      const newPresets = importData.customPresets.filter(p => !existingIds.has(p.id));
+      
+      if (newPresets.length > 0) {
+        await chrome.storage.local.set({ 
+          customPresets: [...existingPresets, ...newPresets] 
+        });
+      }
+    }
+
+    // Update badge
+    chrome.runtime.sendMessage({ action: 'updateBadge' });
+
+    let message = `Imported ${imported} tab${imported !== 1 ? 's' : ''}`;
+    if (skipped > 0) {
+      message += ` (${skipped} skipped: past due or duplicate)`;
+    }
+    showSaveStatus(message);
+
+    // Clear file input
+    event.target.value = '';
+
+  } catch (error) {
+    console.error('Error importing:', error);
+    showSaveStatus('Error importing: ' + error.message, true);
+    event.target.value = '';
+  }
 }
