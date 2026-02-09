@@ -8,6 +8,15 @@ const BATCH_DELAY_MS = 2000; // Wait 2 seconds to collect alarms
 // Update extension badge with count of scheduled tabs
 async function updateBadge() {
   try {
+    // Check if badge is enabled in settings
+    const settingsResult = await chrome.storage.local.get('settings');
+    const settings = settingsResult.settings || { badgeEnabled: true };
+
+    if (!settings.badgeEnabled) {
+      await chrome.action.setBadgeText({ text: '' });
+      return;
+    }
+
     const result = await chrome.storage.local.get('scheduledTabs');
     const scheduledTabs = result.scheduledTabs || {};
     const count = Object.keys(scheduledTabs).length;
@@ -138,13 +147,17 @@ async function processPendingAlarms() {
       const tabs = await chrome.tabs.query({ windowId: window.id });
       const tabIds = tabs.map(t => t.id);
 
+      // Get settings for group name and color
+      const settingsResult = await chrome.storage.local.get('settings');
+      const settings = settingsResult.settings || { groupName: 'Snoozed', groupColor: 'blue' };
+
       // Group all tabs together
       const groupId = await chrome.tabs.group({ tabIds });
 
-      // Set group name and color
+      // Set group name and color from settings
       await chrome.tabGroups.update(groupId, {
-        title: 'Snoozed',
-        color: 'blue'
+        title: settings.groupName || 'Snoozed',
+        color: settings.groupColor || 'blue'
       });
 
       // Show notification
@@ -298,13 +311,17 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
       const tabs = await chrome.tabs.query({ windowId: window.id });
       const tabIds = tabs.map(t => t.id);
 
+      // Get settings for group name and color
+      const settingsResult = await chrome.storage.local.get('settings');
+      const settings = settingsResult.settings || { groupName: 'Snoozed', groupColor: 'blue' };
+
       // Group all tabs together
       const groupId = await chrome.tabs.group({ tabIds });
 
-      // Set group name and color
+      // Set group name and color from settings
       await chrome.tabGroups.update(groupId, {
-        title: 'Snoozed',
-        color: 'blue'
+        title: settings.groupName || 'Snoozed',
+        color: settings.groupColor || 'blue'
       });
 
       // Show notification
@@ -373,6 +390,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const result = await handleScheduleTab(message.alarmId, message.scheduledTime, message.tabData);
         console.log('scheduleTab result:', result);
         sendResponse(result);
+        return;
+      }
+
+      if (message.action === 'updateBadge') {
+        await updateBadge();
+        sendResponse({ success: true });
         return;
       }
     } catch (error) {

@@ -5,6 +5,7 @@ let allScheduledTabs = {}; // Store all tabs for search/filter
 
 // Initialize popup when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
+  await loadTheme();
   await loadCurrentTab();
   await loadScheduledTabs();
   await loadCustomPresets();
@@ -214,6 +215,9 @@ function setupEventListeners() {
   // Keyboard shortcuts help
   document.getElementById('keyboardHelpBtn').addEventListener('click', showKeyboardHelp);
   document.getElementById('closeKeyboardHelpBtn').addEventListener('click', hideKeyboardHelp);
+
+  // Settings button
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -914,4 +918,33 @@ function showKeyboardHelp() {
 // Hide keyboard shortcuts help modal
 function hideKeyboardHelp() {
   document.getElementById('keyboardHelpModal').style.display = 'none';
+}
+
+// Open settings page
+function openSettings() {
+  chrome.tabs.create({ url: 'settings.html' });
+}
+
+// Load and apply theme from settings
+async function loadTheme() {
+  try {
+    const result = await chrome.storage.local.get('settings');
+    const settings = result.settings || { theme: 'auto' };
+    applyTheme(settings.theme);
+  } catch (error) {
+    console.error('Error loading theme:', error);
+  }
+}
+
+// Apply theme to popup
+function applyTheme(theme) {
+  const html = document.documentElement;
+  
+  if (theme === 'light') {
+    html.setAttribute('data-theme', 'light');
+  } else if (theme === 'dark') {
+    html.setAttribute('data-theme', 'dark');
+  } else {
+    html.removeAttribute('data-theme');
+  }
 }

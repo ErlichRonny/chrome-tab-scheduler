@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Scheduler - Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <!-- Header -->
+    <div class="settings-header">
+      <h1>Settings</h1>
+      <button class="btn-back" id="backBtn" title="Back to popup">← Back</button>
+    </div>
+
+    <!-- General Settings -->
+    <section class="settings-section">
+      <h2 class="section-title">General</h2>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label for="defaultPreset">Default Quick Schedule</label>
+          <p class="setting-description">Choose the default preset when using Ctrl+Shift+S</p>
+        </div>
+        <select id="defaultPreset" class="setting-select">
+          <option value="tomorrow9am">Tomorrow 9am</option>
+          <option value="tomorrow2pm">Tomorrow 2pm</option>
+          <option value="1hour">In 1 hour</option>
+          <option value="3hours">In 3 hours</option>
+          <option value="nextMonday9am">Next Monday 9am</option>
+          <option value="nextWeek">Next week</option>
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label for="themeSelect">Theme</label>
+          <p class="setting-description">Choose your preferred color theme</p>
+        </div>
+        <select id="themeSelect" class="setting-select">
+          <option value="auto">Auto (Follow System)</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="settings-section">
+      <h2 class="section-title">Notifications</h2>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label for="notificationsEnabled">Enable Notifications</label>
+          <p class="setting-description">Show desktop notifications when tabs are scheduled or reopened</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notificationsEnabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Badge -->
+    <section class="settings-section">
+      <h2 class="section-title">Badge</h2>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label for="badgeEnabled">Show Badge Counter</label>
+          <p class="setting-description">Display count of scheduled tabs on extension icon</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="badgeEnabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Batch Tabs -->
+    <section class="settings-section">
+      <h2 class="section-title">Batch Tabs</h2>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label for="groupName">Tab Group Name</label>
+          <p class="setting-description">Name for grouped tabs that open together</p>
+        </div>
+        <input type="text" id="groupName" class="setting-input" value="Snoozed" maxlength="20">
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label for="groupColor">Tab Group Color</label>
+          <p class="setting-description">Color for grouped tabs</p>
+        </div>
+        <select id="groupColor" class="setting-select">
+          <option value="blue">Blue</option>
+          <option value="red">Red</option>
+          <option value="yellow">Yellow</option>
+          <option value="green">Green</option>
+          <option value="pink">Pink</option>
+          <option value="purple">Purple</option>
+          <option value="cyan">Cyan</option>
+          <option value="orange">Orange</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Danger Zone -->
+    <section class="settings-section danger-section">
+      <h2 class="section-title">Danger Zone</h2>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label>Clear All Scheduled Tabs</label>
+          <p class="setting-description">Permanently delete all scheduled tabs</p>
+        </div>
+        <button class="btn btn-danger" id="clearAllBtn">Clear All</button>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-label">
+          <label>Reset Settings</label>
+          <p class="setting-description">Reset all settings to default values</p>
+        </div>
+        <button class="btn btn-secondary" id="resetSettingsBtn">Reset</button>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="settings-section">
+      <h2 class="section-title">About</h2>
+
+      <div class="about-info">
+        <div class="about-row">
+          <span class="about-label">Version:</span>
+          <span class="about-value" id="versionInfo">1.7.1</span>
+        </div>
+        <div class="about-row">
+          <span class="about-label">Author:</span>
+          <span class="about-value">Tab Scheduler</span>
+        </div>
+        <div class="about-row">
+          <span class="about-label">License:</span>
+          <span class="about-value">MIT</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Save Status -->
+    <div class="save-status" id="saveStatus" style="display: none;">
+      <span id="saveStatusText">Settings saved!</span>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
