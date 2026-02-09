@@ -91,9 +91,25 @@
     <!-- Scheduled Tabs List -->
     <div class="scheduled-section">
       <h2 class="section-title">Scheduled Tabs</h2>
+
+      <!-- Search Box -->
+      <div class="search-container" id="searchContainer" style="display: none;">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search tabs..."
+          autocomplete="off"
+        >
+        <button id="clearSearchBtn" class="btn-clear-search" title="Clear search">×</button>
+      </div>
+
       <div id="scheduledList" class="scheduled-list">
         <div class="empty-state">No scheduled tabs</div>
       </div>
+
+      <!-- Search Results Info -->
+      <div id="searchResultsInfo" class="search-results-info" style="display: none;"></div>
     </div>
   </div>
 

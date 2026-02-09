@@ -1,6 +1,7 @@
 // Popup script for Tab Scheduler Chrome Extension
 
 let currentTab = null;
+let allScheduledTabs = {}; // Store all tabs for search/filter
 
 // Initialize popup when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
@@ -49,15 +50,29 @@ async function loadScheduledTabs() {
   try {
     const result = await chrome.storage.local.get('scheduledTabs');
     const scheduledTabs = result.scheduledTabs || {};
+
+    // Store globally for search
+    allScheduledTabs = scheduledTabs;
+
     const listElement = document.getElementById('scheduledList');
+    const searchContainer = document.getElementById('searchContainer');
 
     // Clear existing content
     listElement.innerHTML = '';
 
     const entries = Object.entries(scheduledTabs);
 
+    // Show/hide search box based on number of tabs
+    if (entries.length >= 3) {
+      searchContainer.style.display = 'block';
+    } else {
+      searchContainer.style.display = 'none';
+      document.getElementById('searchInput').value = ''; // Clear search when hidden
+    }
+
     if (entries.length === 0) {
       listElement.innerHTML = '<div class="empty-state">No scheduled tabs</div>';
+      document.getElementById('searchResultsInfo').style.display = 'none';
       return;
     }
 
@@ -69,6 +84,12 @@ async function loadScheduledTabs() {
       const item = createScheduledTabItem(alarmId, tabData);
       listElement.appendChild(item);
     });
+
+    // Update search results if there's an active search
+    const searchValue = document.getElementById('searchInput').value;
+    if (searchValue.trim()) {
+      handleSearch();
+    }
   } catch (error) {
     console.error('Error loading scheduled tabs:', error);
   }
@@ -78,6 +99,7 @@ async function loadScheduledTabs() {
 function createScheduledTabItem(alarmId, tabData) {
   const item = document.createElement('div');
   item.className = 'scheduled-item';
+  item.setAttribute('data-alarm-id', alarmId);
 
   const favicon = document.createElement('img');
   favicon.className = 'favicon';
@@ -184,6 +206,10 @@ function setupEventListeners() {
   // Edit modal buttons
   document.getElementById('cancelEditBtn').addEventListener('click', hideEditModal);
   document.getElementById('editScheduleForm').addEventListener('submit', confirmEdit);
+
+  // Search functionality
+  document.getElementById('searchInput').addEventListener('input', handleSearch);
+  document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -810,4 +836,64 @@ function confirmEdit(e) {
       showEditError('Failed to update schedule: ' + error.message);
     }
   });
+}
+
+// ============================================================================
+// Search/Filter Functions
+// ============================================================================
+
+// Handle search input
+function handleSearch() {
+  const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
+  const listElement = document.getElementById('scheduledList');
+  const resultsInfo = document.getElementById('searchResultsInfo');
+
+  // If search is empty, show all tabs
+  if (!searchValue) {
+    const allItems = listElement.querySelectorAll('.scheduled-item');
+    allItems.forEach(item => {
+      item.style.display = 'flex';
+    });
+    resultsInfo.style.display = 'none';
+    return;
+  }
+
+  // Filter tabs
+  const entries = Object.entries(allScheduledTabs);
+  let visibleCount = 0;
+
+  entries.forEach(([alarmId, tabData]) => {
+    const item = listElement.querySelector(`[data-alarm-id="${alarmId}"]`);
+    if (!item) return;
+
+    const title = (tabData.tabInfo.title || '').toLowerCase();
+    const url = (tabData.tabInfo.url || '').toLowerCase();
+
+    // Check if search term matches title or URL
+    if (title.includes(searchValue) || url.includes(searchValue)) {
+      item.style.display = 'flex';
+      visibleCount++;
+    } else {
+      item.style.display = 'none';
+    }
+  });
+
+  // Show results info
+  const totalCount = entries.length;
+  if (visibleCount === 0) {
+    resultsInfo.textContent = 'No tabs found';
+    resultsInfo.style.display = 'block';
+  } else if (visibleCount < totalCount) {
+    resultsInfo.textContent = `Showing ${visibleCount} of ${totalCount} tabs`;
+    resultsInfo.style.display = 'block';
+  } else {
+    resultsInfo.style.display = 'none';
+  }
+}
+
+// Clear search
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  handleSearch();
+  document.getElementById('searchInput').focus();
 }
