@@ -98,14 +98,25 @@ function createScheduledTabItem(alarmId, tabData) {
   info.appendChild(title);
   info.appendChild(time);
 
+  const actions = document.createElement('div');
+  actions.className = 'scheduled-item-actions';
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'btn btn-edit';
+  editBtn.textContent = 'Edit';
+  editBtn.onclick = () => editScheduledTab(alarmId, tabData);
+
   const cancelBtn = document.createElement('button');
   cancelBtn.className = 'btn btn-cancel';
   cancelBtn.textContent = 'Cancel';
   cancelBtn.onclick = () => cancelScheduledTab(alarmId);
 
+  actions.appendChild(editBtn);
+  actions.appendChild(cancelBtn);
+
   item.appendChild(favicon);
   item.appendChild(info);
-  item.appendChild(cancelBtn);
+  item.appendChild(actions);
 
   return item;
 }
@@ -169,6 +180,10 @@ function setupEventListeners() {
   // Delete modal buttons
   document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
   document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+
+  // Edit modal buttons
+  document.getElementById('cancelEditBtn').addEventListener('click', hideEditModal);
+  document.getElementById('editScheduleForm').addEventListener('submit', confirmEdit);
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -303,29 +318,49 @@ async function scheduleTabWithTime(scheduledTime) {
       createdAt: now
     };
 
-    // Save to storage
-    const result = await chrome.storage.local.get('scheduledTabs');
-    const scheduledTabs = result.scheduledTabs || {};
-    scheduledTabs[alarmId] = tabData;
-    await chrome.storage.local.set({ scheduledTabs });
+    console.log('Sending scheduleTab message:', { alarmId, scheduledTime });
 
-    // Create alarm
-    await chrome.alarms.create(alarmId, { when: scheduledTime });
+    // Send message to background script to schedule
+    chrome.runtime.sendMessage({
+      action: 'scheduleTab',
+      alarmId: alarmId,
+      scheduledTime: scheduledTime,
+      tabData: tabData
+    }, async (response) => {
+      // Check for Chrome runtime errors
+      if (chrome.runtime.lastError) {
+        console.error('Runtime error:', chrome.runtime.lastError);
+        showError('Failed to schedule: ' + chrome.runtime.lastError.message);
+        return;
+      }
 
-    // Close current tab
-    await chrome.tabs.remove(currentTab.id);
+      console.log('Received scheduleTab response:', response);
 
-    // Show success notification
-    await chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: 'Tab Scheduled',
-      message: `Tab will reopen ${formatScheduledTime(scheduledTime)}`,
-      priority: 1
+      try {
+        if (!response || !response.success) {
+          throw new Error(response?.error || 'Failed to schedule tab');
+        }
+
+        // Close current tab
+        await chrome.tabs.remove(currentTab.id);
+
+        // Show success notification (non-blocking)
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon48.png',
+          title: 'Tab Scheduled',
+          message: `Tab will reopen ${formatScheduledTime(scheduledTime)}`,
+          priority: 1
+        }).catch(err => console.warn('Notification failed:', err));
+
+        // Close popup (tab is already closed)
+        window.close();
+      } catch (error) {
+        console.error('Error scheduling tab:', error);
+        console.error('Error stack:', error.stack);
+        showError('Failed to schedule tab: ' + error.message);
+      }
     });
-
-    // Close popup (tab is already closed)
-    window.close();
   } catch (error) {
     console.error('Error scheduling tab:', error);
     showError('Failed to schedule tab. Please try again.');
@@ -333,33 +368,47 @@ async function scheduleTabWithTime(scheduledTime) {
 }
 
 // Cancel a scheduled tab
-async function cancelScheduledTab(alarmId) {
-  try {
-    // Clear alarm
-    await chrome.alarms.clear(alarmId);
+function cancelScheduledTab(alarmId) {
+  console.log('Sending cancelSchedule message for:', alarmId);
 
-    // Remove from storage
-    const result = await chrome.storage.local.get('scheduledTabs');
-    const scheduledTabs = result.scheduledTabs || {};
-    const tabData = scheduledTabs[alarmId];
-    delete scheduledTabs[alarmId];
-    await chrome.storage.local.set({ scheduledTabs });
+  // Send message to background script to cancel
+  chrome.runtime.sendMessage({
+    action: 'cancelSchedule',
+    alarmId: alarmId
+  }, async (response) => {
+    // Check for Chrome runtime errors
+    if (chrome.runtime.lastError) {
+      console.error('Runtime error:', chrome.runtime.lastError);
+      showError('Failed to cancel: ' + chrome.runtime.lastError.message);
+      return;
+    }
 
-    // Reload list
-    await loadScheduledTabs();
+    console.log('Received response:', response);
 
-    // Show notification
-    await chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: 'Schedule Cancelled',
-      message: `Cancelled: ${tabData?.tabInfo?.title || 'Tab'}`,
-      priority: 1
-    });
-  } catch (error) {
-    console.error('Error cancelling scheduled tab:', error);
-    showError('Failed to cancel scheduled tab');
-  }
+    try {
+      if (!response || !response.success) {
+        throw new Error(response?.error || 'Failed to cancel schedule');
+      }
+
+      // Reload list
+      await loadScheduledTabs();
+
+      // Show notification (non-blocking, don't fail if this errors)
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Schedule Cancelled',
+        message: `Cancelled: ${response.tabData?.tabInfo?.title || 'Tab'}`,
+        priority: 1
+      }).catch(err => console.warn('Notification failed:', err));
+
+      console.log('Successfully cancelled schedule');
+    } catch (error) {
+      console.error('Error cancelling scheduled tab:', error);
+      console.error('Error stack:', error.stack);
+      showError('Failed to cancel scheduled tab: ' + error.message);
+    }
+  });
 }
 
 // Check if URL is invalid for scheduling
@@ -601,4 +650,164 @@ async function confirmDelete() {
     console.error('Error confirming deletion:', error);
     showError('Failed to delete preset');
   }
+}
+
+// ============================================================================
+// Edit Scheduled Tab Functions
+// ============================================================================
+
+// Store alarm ID and tab data for editing
+let tabToEdit = null;
+
+// Edit a scheduled tab (shows edit modal)
+function editScheduledTab(alarmId, tabData) {
+  try {
+    // Store the tab to edit
+    tabToEdit = { alarmId, tabData };
+
+    // Populate modal with current info
+    document.getElementById('editTabTitle').textContent = tabData.tabInfo.title || 'Untitled';
+
+    // Set current scheduled time as default value
+    const currentDate = new Date(tabData.scheduledTime);
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const hours = String(currentDate.getHours()).padStart(2, '0');
+    const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+    const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+    document.getElementById('editScheduleTime').value = currentDateTime;
+
+    // Set minimum datetime to current time + 1 minute
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 1);
+    const minYear = now.getFullYear();
+    const minMonth = String(now.getMonth() + 1).padStart(2, '0');
+    const minDay = String(now.getDate()).padStart(2, '0');
+    const minHours = String(now.getHours()).padStart(2, '0');
+    const minMinutes = String(now.getMinutes()).padStart(2, '0');
+    const minDateTime = `${minYear}-${minMonth}-${minDay}T${minHours}:${minMinutes}`;
+    document.getElementById('editScheduleTime').min = minDateTime;
+
+    // Clear any previous errors
+    clearEditError();
+
+    // Show modal
+    showEditModal();
+  } catch (error) {
+    console.error('Error opening edit modal:', error);
+    showError('Failed to open edit dialog');
+  }
+}
+
+// Show edit modal
+function showEditModal() {
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+// Hide edit modal
+function hideEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+  tabToEdit = null;
+  clearEditError();
+}
+
+// Clear edit error message
+function clearEditError() {
+  const errorElement = document.getElementById('editErrorMessage');
+  errorElement.textContent = '';
+  errorElement.style.display = 'none';
+}
+
+// Show edit error message
+function showEditError(message) {
+  const errorElement = document.getElementById('editErrorMessage');
+  errorElement.textContent = message;
+  errorElement.style.display = 'block';
+}
+
+// Confirm edit (called when user submits the edit form)
+function confirmEdit(e) {
+  e.preventDefault();
+
+  if (!tabToEdit) {
+    return;
+  }
+
+  const newTimeValue = document.getElementById('editScheduleTime').value;
+
+  if (!newTimeValue) {
+    showEditError('Please select a date and time');
+    return;
+  }
+
+  const newScheduledTime = new Date(newTimeValue).getTime();
+  const now = Date.now();
+
+  // Validate time
+  if (newScheduledTime <= now) {
+    showEditError('Please select a future date and time');
+    return;
+  }
+
+  const { alarmId: oldAlarmId, tabData } = tabToEdit;
+
+  // Generate new alarm ID with new timestamp
+  const randomId = Math.random().toString(36).substring(2, 8);
+  const newAlarmId = `alarm_${newScheduledTime}_${randomId}`;
+
+  // Update tab data with new scheduled time and alarm ID
+  const updatedTabData = {
+    ...tabData,
+    alarmId: newAlarmId,
+    scheduledTime: newScheduledTime
+  };
+
+  console.log('Sending editSchedule message:', { oldAlarmId, newAlarmId, newScheduledTime });
+
+  // Send message to background script to edit schedule
+  chrome.runtime.sendMessage({
+    action: 'editSchedule',
+    oldAlarmId: oldAlarmId,
+    newAlarmId: newAlarmId,
+    newScheduledTime: newScheduledTime,
+    tabData: updatedTabData
+  }, async (response) => {
+    // Check for Chrome runtime errors
+    if (chrome.runtime.lastError) {
+      console.error('Runtime error:', chrome.runtime.lastError);
+      showEditError('Failed to update schedule: ' + chrome.runtime.lastError.message);
+      return;
+    }
+
+    console.log('Received editSchedule response:', response);
+
+    try {
+      if (!response || !response.success) {
+        throw new Error(response?.error || 'Failed to update schedule');
+      }
+
+      // Reload scheduled tabs list
+      await loadScheduledTabs();
+
+      // Hide modal
+      hideEditModal();
+
+      // Show notification (non-blocking, don't fail if this errors)
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Schedule Updated',
+        message: `"${tabData.tabInfo.title}" will now reopen ${formatScheduledTime(newScheduledTime)}`,
+        priority: 1
+      }).catch(err => console.warn('Notification failed:', err));
+
+      console.log('Schedule updated successfully');
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+      console.error('Error stack:', error.stack);
+      showEditError('Failed to update schedule: ' + error.message);
+    }
+  });
 }

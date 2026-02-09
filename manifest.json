@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Tab Scheduler",
-  "version": "1.3.0",
+  "version": "1.5.4",
   "description": "Schedule tabs to reopen at a specific date and time with smart presets",
   "permissions": [
     "tabs",
     "alarms",
     "storage",
     "notifications",
-    "tabGroups"
+    "tabGroups",
+    "contextMenus"
   ],
   "background": {
     "service_worker": "background.js"

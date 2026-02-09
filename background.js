@@ -5,16 +5,39 @@ let pendingAlarms = [];
 let batchTimeout = null;
 const BATCH_DELAY_MS = 2000; // Wait 2 seconds to collect alarms
 
+// Update extension badge with count of scheduled tabs
+async function updateBadge() {
+  try {
+    const result = await chrome.storage.local.get('scheduledTabs');
+    const scheduledTabs = result.scheduledTabs || {};
+    const count = Object.keys(scheduledTabs).length;
+
+    if (count === 0) {
+      // Clear badge if no scheduled tabs
+      await chrome.action.setBadgeText({ text: '' });
+    } else {
+      // Show count
+      await chrome.action.setBadgeText({ text: count.toString() });
+      await chrome.action.setBadgeBackgroundColor({ color: '#4285f4' }); // Chrome blue
+    }
+  } catch (error) {
+    console.error('Error updating badge:', error);
+  }
+}
+
 // On extension install or update
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Tab Scheduler installed/updated');
   reconcileAlarmsAndStorage();
+  createContextMenus();
+  updateBadge();
 });
 
 // On browser startup
 chrome.runtime.onStartup.addListener(() => {
   console.log('Browser started, reconciling alarms');
   reconcileAlarmsAndStorage();
+  updateBadge();
 });
 
 // Main alarm listener - fires when scheduled time is reached
@@ -143,6 +166,9 @@ async function processPendingAlarms() {
     await chrome.storage.local.set({ scheduledTabs });
     console.log('Successfully processed batch');
 
+    // Update badge
+    await updateBadge();
+
   } catch (error) {
     console.error('Error processing pending alarms:', error);
 
@@ -164,6 +190,7 @@ async function processPendingAlarms() {
 
     await chrome.storage.local.set({ scheduledTabs });
     pendingAlarms = [];
+    await updateBadge();
   }
 }
 
@@ -222,6 +249,9 @@ async function reconcileAlarmsAndStorage() {
     await chrome.storage.local.set({ scheduledTabs });
 
     console.log('Reconciliation complete. Active schedules:', Object.keys(scheduledTabs).length);
+
+    // Update badge
+    await updateBadge();
   } catch (error) {
     console.error('Error during reconciliation:', error);
   }
@@ -309,12 +339,357 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
   }
 }
 
-// Handle messages from popup (optional, for future enhancements)
+// Handle messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'getScheduledTabs') {
-    chrome.storage.local.get('scheduledTabs').then(result => {
-      sendResponse({ scheduledTabs: result.scheduledTabs || {} });
-    });
-    return true; // Keep channel open for async response
+  console.log('Background received message:', message.action);
+
+  // Handle async operations properly
+  (async () => {
+    try {
+      if (message.action === 'getScheduledTabs') {
+        const result = await chrome.storage.local.get('scheduledTabs');
+        sendResponse({ scheduledTabs: result.scheduledTabs || {} });
+        return;
+      }
+
+      if (message.action === 'cancelSchedule') {
+        console.log('Handling cancelSchedule for:', message.alarmId);
+        const result = await handleCancelSchedule(message.alarmId);
+        console.log('cancelSchedule result:', result);
+        sendResponse(result);
+        return;
+      }
+
+      if (message.action === 'editSchedule') {
+        console.log('Handling editSchedule:', message.oldAlarmId, '->', message.newAlarmId);
+        const result = await handleEditSchedule(message.oldAlarmId, message.newAlarmId, message.newScheduledTime, message.tabData);
+        console.log('editSchedule result:', result);
+        sendResponse(result);
+        return;
+      }
+
+      if (message.action === 'scheduleTab') {
+        console.log('Handling scheduleTab:', message.alarmId);
+        const result = await handleScheduleTab(message.alarmId, message.scheduledTime, message.tabData);
+        console.log('scheduleTab result:', result);
+        sendResponse(result);
+        return;
+      }
+    } catch (error) {
+      console.error('Message handler error:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  })();
+
+  return true; // Keep message channel open for async response
+});
+
+// Listen for storage changes to update badge when popup modifies scheduledTabs
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes.scheduledTabs) {
+    updateBadge();
   }
 });
+
+// Handle cancel schedule request from popup
+async function handleCancelSchedule(alarmId) {
+  try {
+    // Clear alarm
+    await chrome.alarms.clear(alarmId);
+
+    // Remove from storage
+    const result = await chrome.storage.local.get('scheduledTabs');
+    const scheduledTabs = result.scheduledTabs || {};
+    const tabData = scheduledTabs[alarmId];
+
+    if (!tabData) {
+      return { success: false, error: 'Schedule not found' };
+    }
+
+    delete scheduledTabs[alarmId];
+    await chrome.storage.local.set({ scheduledTabs });
+
+    // Update badge
+    await updateBadge();
+
+    return { success: true, tabData };
+  } catch (error) {
+    console.error('Error cancelling schedule:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Handle edit schedule request from popup
+async function handleEditSchedule(oldAlarmId, newAlarmId, newScheduledTime, updatedTabData) {
+  try {
+    // Load existing scheduled tabs
+    const result = await chrome.storage.local.get('scheduledTabs');
+    const scheduledTabs = result.scheduledTabs || {};
+
+    // Remove old alarm
+    await chrome.alarms.clear(oldAlarmId);
+    delete scheduledTabs[oldAlarmId];
+
+    // Add new alarm
+    await chrome.alarms.create(newAlarmId, { when: newScheduledTime });
+    scheduledTabs[newAlarmId] = updatedTabData;
+
+    // Save to storage
+    await chrome.storage.local.set({ scheduledTabs });
+
+    // Update badge
+    await updateBadge();
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error editing schedule:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Handle schedule tab request from popup
+async function handleScheduleTab(alarmId, scheduledTime, tabData) {
+  try {
+    // Load existing scheduled tabs
+    const result = await chrome.storage.local.get('scheduledTabs');
+    const scheduledTabs = result.scheduledTabs || {};
+
+    // Add to storage
+    scheduledTabs[alarmId] = tabData;
+    await chrome.storage.local.set({ scheduledTabs });
+
+    // Create alarm
+    await chrome.alarms.create(alarmId, { when: scheduledTime });
+
+    // Update badge
+    await updateBadge();
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error scheduling tab:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ============================================================================
+// Context Menu Functions
+// ============================================================================
+
+// Create context menu items
+function createContextMenus() {
+  // Remove all existing menus first
+  chrome.contextMenus.removeAll(() => {
+    // Create parent menu
+    chrome.contextMenus.create({
+      id: 'schedule-tab',
+      title: 'Schedule Tab',
+      contexts: ['page']
+    });
+
+    // Add preset submenu items
+    const presets = [
+      { id: '1hour', title: 'In 1 hour' },
+      { id: '3hours', title: 'In 3 hours' },
+      { id: 'tomorrow9am', title: 'Tomorrow 9am' },
+      { id: 'tomorrow2pm', title: 'Tomorrow 2pm' },
+      { id: 'nextMonday9am', title: 'Next Monday 9am' },
+      { id: 'nextWeek', title: 'Next week' }
+    ];
+
+    presets.forEach(preset => {
+      chrome.contextMenus.create({
+        id: `schedule-${preset.id}`,
+        parentId: 'schedule-tab',
+        title: preset.title,
+        contexts: ['page']
+      });
+    });
+
+    console.log('Context menus created');
+  });
+}
+
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId.startsWith('schedule-')) {
+    const presetId = info.menuItemId.replace('schedule-', '');
+    await scheduleTabFromContextMenu(tab, presetId);
+  }
+});
+
+// Schedule a tab from context menu
+async function scheduleTabFromContextMenu(tab, presetId) {
+  try {
+    // Check if URL is valid
+    if (isInvalidUrlForScheduling(tab.url)) {
+      await chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Cannot Schedule',
+        message: 'System tabs cannot be scheduled',
+        priority: 1
+      });
+      return;
+    }
+
+    // Calculate scheduled time
+    const scheduledTime = calculatePresetTimeForContextMenu(presetId);
+
+    if (!scheduledTime) {
+      throw new Error('Invalid preset');
+    }
+
+    const now = Date.now();
+
+    // Validate time
+    if (scheduledTime <= now) {
+      await chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Cannot Schedule',
+        message: 'Please select a future time',
+        priority: 1
+      });
+      return;
+    }
+
+    // Generate unique alarm ID
+    const randomId = Math.random().toString(36).substring(2, 8);
+    const alarmId = `alarm_${scheduledTime}_${randomId}`;
+
+    // Prepare tab data
+    const tabData = {
+      alarmId: alarmId,
+      scheduledTime: scheduledTime,
+      tabInfo: {
+        url: tab.url,
+        title: tab.title || 'Untitled',
+        favIconUrl: tab.favIconUrl || 'icons/icon48.png'
+      },
+      createdAt: now
+    };
+
+    // Save to storage
+    const result = await chrome.storage.local.get('scheduledTabs');
+    const scheduledTabs = result.scheduledTabs || {};
+    scheduledTabs[alarmId] = tabData;
+    await chrome.storage.local.set({ scheduledTabs });
+
+    // Create alarm
+    await chrome.alarms.create(alarmId, { when: scheduledTime });
+
+    // Close tab
+    await chrome.tabs.remove(tab.id);
+
+    // Show success notification
+    await chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'Tab Scheduled',
+      message: `"${tab.title}" will reopen ${formatScheduledTimeForNotification(scheduledTime)}`,
+      priority: 1
+    });
+
+    // Update badge
+    await updateBadge();
+
+    console.log('Tab scheduled from context menu:', tab.title);
+
+  } catch (error) {
+    console.error('Error scheduling from context menu:', error);
+    await chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'Scheduling Error',
+      message: 'Failed to schedule tab',
+      priority: 2
+    });
+  }
+}
+
+// Calculate time for preset (context menu version)
+function calculatePresetTimeForContextMenu(presetId) {
+  const now = new Date();
+  let targetDate = new Date();
+
+  switch (presetId) {
+    case '1hour':
+      targetDate.setHours(now.getHours() + 1);
+      break;
+
+    case '3hours':
+      targetDate.setHours(now.getHours() + 3);
+      break;
+
+    case 'tomorrow9am':
+      targetDate.setDate(now.getDate() + 1);
+      targetDate.setHours(9, 0, 0, 0);
+      break;
+
+    case 'tomorrow2pm':
+      targetDate.setDate(now.getDate() + 1);
+      targetDate.setHours(14, 0, 0, 0);
+      break;
+
+    case 'nextMonday9am':
+      const currentDay = now.getDay();
+      const daysUntilMonday = currentDay === 0 ? 1 : (8 - currentDay);
+      targetDate.setDate(now.getDate() + daysUntilMonday);
+      targetDate.setHours(9, 0, 0, 0);
+      break;
+
+    case 'nextWeek':
+      targetDate.setDate(now.getDate() + 7);
+      break;
+
+    default:
+      return null;
+  }
+
+  return targetDate.getTime();
+}
+
+// Check if URL is invalid for scheduling
+function isInvalidUrlForScheduling(url) {
+  if (!url) return true;
+
+  const invalidPrefixes = [
+    'chrome://',
+    'chrome-extension://',
+    'about:',
+    'edge://',
+    'brave://',
+    'file://'
+  ];
+
+  return invalidPrefixes.some(prefix => url.startsWith(prefix)) || url === 'about:blank';
+}
+
+// Format scheduled time for notification
+function formatScheduledTimeForNotification(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = timestamp - now.getTime();
+
+  // If less than 24 hours away
+  if (diffMs < 24 * 60 * 60 * 1000) {
+    const hours = Math.floor(diffMs / (60 * 60 * 1000));
+    const minutes = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
+
+    if (hours === 0) {
+      return `in ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    return `in ${hours} hour${hours !== 1 ? 's' : ''} ${minutes} min`;
+  }
+
+  // Format as date/time
+  const options = {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  };
+
+  return date.toLocaleString('en-US', options);
+}

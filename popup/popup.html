@@ -109,6 +109,23 @@
     </div>
   </div>
 
+  <!-- Edit Schedule Modal -->
+  <div class="modal-overlay" id="editModal" style="display: none;">
+    <div class="modal-content">
+      <h3 class="modal-title">Edit Scheduled Time</h3>
+      <p class="modal-message">Change the scheduled time for "<span id="editTabTitle"></span>"</p>
+      <form id="editScheduleForm">
+        <label for="editScheduleTime" class="form-label">New date and time:</label>
+        <input type="datetime-local" id="editScheduleTime" class="datetime-input" required>
+        <div id="editErrorMessage" class="error-message"></div>
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>
