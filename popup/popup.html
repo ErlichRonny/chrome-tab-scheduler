@@ -11,6 +11,7 @@
     <!-- Header -->
     <div class="header">
       <h1>Tab Scheduler</h1>
+      <button class="btn-keyboard-help" id="keyboardHelpBtn" title="Keyboard shortcuts">⌨️</button>
     </div>
 
     <!-- Current Tab Display -->
@@ -139,6 +140,37 @@
           <button type="submit" class="btn btn-primary">Update</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Help Modal -->
+  <div class="modal-overlay" id="keyboardHelpModal" style="display: none;">
+    <div class="modal-content modal-keyboard-help">
+      <h3 class="modal-title">Keyboard Shortcuts</h3>
+      <div class="keyboard-shortcuts-list">
+        <div class="shortcut-item">
+          <div class="shortcut-keys">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>.</kbd>
+          </div>
+          <div class="shortcut-description">Open Tab Scheduler</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>
+          </div>
+          <div class="shortcut-description">Quick schedule for tomorrow 9am</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>L</kbd>
+          </div>
+          <div class="shortcut-description">Quick schedule for 3 hours later</div>
+        </div>
+      </div>
+      <p class="keyboard-help-note">On Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd> and <kbd>⌥ Option</kbd> instead of <kbd>Alt</kbd></p>
+      <div class="modal-buttons">
+        <button class="btn btn-primary" id="closeKeyboardHelpBtn">Got it</button>
+      </div>
     </div>
   </div>
 

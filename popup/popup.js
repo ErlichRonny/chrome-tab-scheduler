@@ -210,6 +210,10 @@ function setupEventListeners() {
   // Search functionality
   document.getElementById('searchInput').addEventListener('input', handleSearch);
   document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+
+  // Keyboard shortcuts help
+  document.getElementById('keyboardHelpBtn').addEventListener('click', showKeyboardHelp);
+  document.getElementById('closeKeyboardHelpBtn').addEventListener('click', hideKeyboardHelp);
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -896,4 +900,18 @@ function clearSearch() {
   document.getElementById('searchInput').value = '';
   handleSearch();
   document.getElementById('searchInput').focus();
+}
+
+// ============================================================================
+// Keyboard Shortcuts Help
+// ============================================================================
+
+// Show keyboard shortcuts help modal
+function showKeyboardHelp() {
+  document.getElementById('keyboardHelpModal').style.display = 'flex';
+}
+
+// Hide keyboard shortcuts help modal
+function hideKeyboardHelp() {
+  document.getElementById('keyboardHelpModal').style.display = 'none';
 }

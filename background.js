@@ -391,6 +391,112 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
+// ============================================================================
+// Keyboard Shortcuts
+// ============================================================================
+
+// Handle keyboard commands
+chrome.commands.onCommand.addListener(async (command) => {
+  console.log('Command received:', command);
+
+  if (command === 'quick-schedule-tomorrow') {
+    await handleQuickScheduleCommand('tomorrow9am');
+  } else if (command === 'quick-schedule-later') {
+    await handleQuickScheduleCommand('3hours');
+  }
+});
+
+// Handle quick schedule keyboard shortcuts
+async function handleQuickScheduleCommand(preset) {
+  try {
+    // Get current active tab
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    if (!tab) {
+      console.error('No active tab found');
+      return;
+    }
+
+    // Check if URL is valid for scheduling
+    if (isInvalidUrlForScheduling(tab.url)) {
+      await chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Cannot Schedule',
+        message: 'System tabs cannot be scheduled',
+        priority: 1
+      });
+      return;
+    }
+
+    // Calculate scheduled time based on preset
+    const scheduledTime = calculatePresetTimeForContextMenu(preset);
+
+    if (!scheduledTime || scheduledTime <= Date.now()) {
+      await chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Cannot Schedule',
+        message: 'Invalid time selected',
+        priority: 1
+      });
+      return;
+    }
+
+    // Generate unique alarm ID
+    const randomId = Math.random().toString(36).substring(2, 8);
+    const alarmId = `alarm_${scheduledTime}_${randomId}`;
+
+    // Prepare tab data
+    const tabData = {
+      alarmId: alarmId,
+      scheduledTime: scheduledTime,
+      tabInfo: {
+        url: tab.url,
+        title: tab.title || 'Untitled',
+        favIconUrl: tab.favIconUrl || 'icons/icon48.png'
+      },
+      createdAt: Date.now()
+    };
+
+    // Save to storage
+    const result = await chrome.storage.local.get('scheduledTabs');
+    const scheduledTabs = result.scheduledTabs || {};
+    scheduledTabs[alarmId] = tabData;
+    await chrome.storage.local.set({ scheduledTabs });
+
+    // Create alarm
+    await chrome.alarms.create(alarmId, { when: scheduledTime });
+
+    // Update badge
+    await updateBadge();
+
+    // Close tab
+    await chrome.tabs.remove(tab.id);
+
+    // Show success notification
+    await chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'Tab Scheduled',
+      message: `"${tab.title}" will reopen ${formatScheduledTimeForNotification(scheduledTime)}`,
+      priority: 1
+    });
+
+    console.log('Tab scheduled via keyboard shortcut:', tab.title);
+
+  } catch (error) {
+    console.error('Error in quick schedule command:', error);
+    await chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'Scheduling Error',
+      message: 'Failed to schedule tab',
+      priority: 2
+    });
+  }
+}
+
 // Handle cancel schedule request from popup
 async function handleCancelSchedule(alarmId) {
   try {

@@ -99,12 +99,40 @@ body {
   padding: 16px;
   background-color: var(--primary-color);
   color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .header h1 {
   font-size: 18px;
   font-weight: 500;
   margin: 0;
+}
+
+.btn-keyboard-help {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-keyboard-help:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.btn-keyboard-help:active {
+  transform: scale(0.95);
 }
 
 /* Current Tab Display */
@@ -727,4 +755,63 @@ body {
 .scheduled-item-actions {
   display: flex;
   gap: 8px;
+}
+
+/* Keyboard Shortcuts Help Modal */
+.modal-keyboard-help {
+  width: 400px;
+  max-width: 90vw;
+}
+
+.keyboard-shortcuts-list {
+  margin: 16px 0;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 8px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  gap: 16px;
+}
+
+.shortcut-keys {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.shortcut-keys kbd {
+  display: inline-block;
+  padding: 4px 8px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  min-width: 24px;
+  text-align: center;
+}
+
+.shortcut-description {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.keyboard-help-note {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin: 16px 0 8px 0;
+  font-style: italic;
 }
