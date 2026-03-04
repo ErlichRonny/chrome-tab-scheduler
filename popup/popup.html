@@ -87,6 +87,55 @@
 
       <div id="errorMessage" class="error-message"></div>
 
+      <!-- Repeat Toggle -->
+      <div class="recurrence-toggle-row">
+        <span class="recurrence-toggle-label">🔁 Repeat</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="recurrenceToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- Recurrence Panel (hidden until toggle is on) -->
+      <div class="recurrence-panel" id="recurrencePanel" style="display: none;">
+        <div class="recurrence-pattern-row">
+          <label class="recurrence-radio-label">
+            <input type="radio" name="recurrencePattern" value="daily" checked> Daily
+          </label>
+          <label class="recurrence-radio-label">
+            <input type="radio" name="recurrencePattern" value="weekdays"> Weekdays
+          </label>
+          <label class="recurrence-radio-label">
+            <input type="radio" name="recurrencePattern" value="weekly"> Weekly
+          </label>
+          <label class="recurrence-radio-label">
+            <input type="radio" name="recurrencePattern" value="custom"> Custom
+          </label>
+        </div>
+
+        <!-- Custom day picker (shown only when "Custom" is selected) -->
+        <div class="recurrence-days-row" id="recurrenceDaysRow" style="display: none;">
+          <button type="button" class="day-pill" data-day="1">M</button>
+          <button type="button" class="day-pill" data-day="2">T</button>
+          <button type="button" class="day-pill" data-day="3">W</button>
+          <button type="button" class="day-pill" data-day="4">T</button>
+          <button type="button" class="day-pill" data-day="5">F</button>
+          <button type="button" class="day-pill" data-day="6">S</button>
+          <button type="button" class="day-pill" data-day="0">S</button>
+        </div>
+
+        <!-- End date row -->
+        <div class="recurrence-end-row">
+          <label class="recurrence-radio-label">
+            <input type="radio" name="recurrenceEnd" value="never" checked> Never
+          </label>
+          <label class="recurrence-radio-label">
+            <input type="radio" name="recurrenceEnd" value="date"> End on
+          </label>
+          <input type="date" id="recurrenceEndDate" class="recurrence-end-date" style="display: none;">
+        </div>
+      </div>
+
       <button id="scheduleButton" class="btn btn-primary">
         Schedule & Close Tab
       </button>
