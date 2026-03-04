@@ -1,119 +1,197 @@
 <div align="center">
 
-# Tab Scheduler Chrome Extension
+# Tab Scheduler
 
 ![Tab Scheduler Logo](icons/icon128.png)
 
-**Schedule browser tabs to reopen at any future time**
+**Snooze any browser tab and have it reopen exactly when you need it**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
 [![Version](https://img.shields.io/badge/version-1.11.0-green.svg)](https://github.com/ErlichRonny/chrome-tab-scheduler/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/ErlichRonny/chrome-tab-scheduler?style=social)](https://github.com/ErlichRonny/chrome-tab-scheduler/stargazers)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Contributing](#contributing)
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Keyboard Shortcuts](#keyboard-shortcuts) • [Contributing](#contributing)
 
 </div>
 
 ---
 
+Found an article you want to read at lunch? A recipe to try this weekend? A GitHub PR to review Monday morning? Schedule the tab — it closes now and reopens right when you need it.
+
 ## Screenshots
 
 <table>
 <tr>
-<td><img src="screenshots/main-popup.png" alt="Main Popup" width="400"/><br/><em>Quick schedule buttons</em></td>
-<td><img src="screenshots/scheduled-tabs.png" alt="Scheduled Tabs" width="400"/><br/><em>Manage scheduled tabs</em></td>
+<td><img src="screenshots/main-popup.png" alt="Main Popup" width="400"/><br/><em>One-click scheduling with smart presets</em></td>
+<td><img src="screenshots/scheduled-tabs.png" alt="Scheduled Tabs" width="400"/><br/><em>View, edit, search, and cancel scheduled tabs</em></td>
 </tr>
 <tr>
-<td><img src="screenshots/settings.png" alt="Settings" width="400"/><br/><em>Customization options</em></td>
-<td><img src="screenshots/custom-presets.png" alt="Custom Presets" width="400"/><br/><em>Create your own presets</em></td>
+<td><img src="screenshots/settings.png" alt="Settings" width="400"/><br/><em>Themes, notifications, and more</em></td>
+<td><img src="screenshots/custom-presets.png" alt="Custom Presets" width="400"/><br/><em>Create your own scheduling presets</em></td>
 </tr>
 <tr>
-<td><img src="screenshots/dark-mode.png" alt="Dark Mode" width="400"/><br/><em>Dark mode support</em></td>
+<td><img src="screenshots/dark-mode.png" alt="Dark Mode" width="400"/><br/><em>Full dark mode support</em></td>
 </tr>
 </table>
 
-> **Note**: Screenshots will be added soon. See [screenshots/README.md](screenshots/README.md) for details.
-
 ## Features
 
-- 📅 **Schedule Tabs**: Schedule any tab to reopen at a future date/time
-- ⚡ **Smart Presets**: Quick buttons for "Tomorrow 9am", "In 1 hour", "Next Monday", etc.
-- 🎨 **Custom Presets**: Create your own scheduling presets with custom times and labels
-- 🗓️ **Calendar Picker**: Visual date/time picker for precise scheduling
-- 📂 **Grouped Tabs**: Multiple tabs opening together (within 2 seconds) open in one window, grouped as "Snoozed"
-- 🔔 **Desktop Notifications**: Get notified when tabs are scheduled and reopened
-- 📋 **Manage Schedule**: View, search, edit, and cancel all scheduled tabs
-- ⌨️ **Keyboard Shortcuts**: Quick actions with customizable keyboard shortcuts
-- ⚙️ **Settings & Customization**: Themes, animations, notification preferences, and more
-- 💾 **Import/Export**: Backup and restore your scheduled tabs
-- 🔄 **Persistent & Reliable**: Works across browser restarts and handles missed schedules
-- 🎯 **Clean, Modern UI**: Professional design with smooth animations and empty states
+- ⚡ **Smart Presets**: One click to schedule for "Tomorrow 9am", "In 1 hour", "Next Monday", and more
+- 🎨 **Custom Presets**: Create your own presets — "Morning Coffee", "After Work", anything you want
+- 🗓️ **Custom Date/Time**: Pick any exact date and time with the calendar picker
+- ↩️ **Undo**: Changed your mind? Hit undo within 5 seconds to cancel and reopen the tab
+- 🖱️ **Context Menu**: Right-click any page and schedule it without opening the popup
+- ⌨️ **Keyboard Shortcuts**: Schedule the current tab instantly without touching the mouse
+- 📋 **Manage Schedule**: View, search, edit, and cancel all your scheduled tabs
+- 📂 **Batch Opening**: Multiple tabs scheduled for the same time open together in one grouped window
+- 🔔 **Notifications**: Desktop alerts when tabs are scheduled and when they reopen
+- ⚙️ **Settings**: Light/dark/system theme, notification preferences, badge counter, and more
+- 💾 **Import/Export**: Back up and restore your scheduled tabs as JSON
+- 🔄 **Reliable**: Works across browser restarts — missed schedules open automatically on next launch
 
 ## Installation
 
-### Load Unpacked (Development)
-
 1. Clone or download this repository
-2. Open Chrome and navigate to `chrome://extensions`
-3. Enable "Developer mode" (toggle in top-right corner)
-4. Click "Load unpacked"
-5. Select the extension directory (the folder containing manifest.json)
-6. The extension icon should appear in your toolbar
+2. Open Chrome and go to `chrome://extensions`
+3. Enable **Developer mode** (toggle in the top-right corner)
+4. Click **Load unpacked**
+5. Select the extension directory (the folder containing `manifest.json`)
+6. The Tab Scheduler icon appears in your toolbar
+
+> Also works on Edge, Brave, and other Chromium-based browsers (Chrome 88+).
 
 ## Usage
 
-### Quick Schedule (New!)
+### Quick Schedule
 
 The fastest way to schedule a tab:
 
-1. Navigate to any webpage you want to schedule
+1. Open any webpage you want to save for later
 2. Click the Tab Scheduler icon in your toolbar
-3. Click any Quick Schedule button:
-   - **In 1 hour** / **In 3 hours** - For short-term scheduling
-   - **Tomorrow 9am** / **Tomorrow 2pm** - For next-day scheduling
-   - **Next Monday 9am** - For weekly planning
-   - **Next week** - Same time, 7 days from now
+3. Click a preset — **Tomorrow 9am**, **In 3 hours**, **Next Monday**, etc.
 4. The tab closes immediately and reopens at the scheduled time
 
-### Custom Schedule
+### Keyboard Shortcuts
 
-For specific dates and times:
+Schedule without even opening the popup:
 
-1. Navigate to any webpage you want to schedule
-2. Click the Tab Scheduler icon in your toolbar
-3. Scroll to "Or Pick Custom Time"
-4. Click the date/time picker (calendar icon 📅)
-5. Select your desired date and time
-6. Click "Schedule & Close Tab"
-7. The tab closes immediately
-8. At the scheduled time, the tab reopens as a new window
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+.` (Mac: `⌘+Shift+.`) | Open Tab Scheduler popup |
+| `Ctrl+Shift+S` (Mac: `⌘+Shift+S`) | Schedule current tab for tomorrow 9am |
+| `Ctrl+Shift+L` (Mac: `⌘+Shift+L`) | Schedule current tab for 3 hours from now |
 
-### View Scheduled Tabs
+### Context Menu
+
+Right-click anywhere on a page and choose **Schedule Tab** to access all presets without opening the popup.
+
+### Custom Presets
+
+Create presets that match your schedule:
+
+1. Click **+** next to "My Presets"
+2. Give it a name (e.g., "Lunch Break"), set a time and how many days ahead
+3. Your preset appears as a one-click button alongside the built-in ones
+
+Long-press any custom preset to edit or delete it.
+
+### Custom Date/Time
+
+For a specific moment:
 
 1. Click the Tab Scheduler icon
-2. Scroll down to see all scheduled tabs
-3. Each shows the page title and scheduled time
+2. Scroll to **Or Pick Custom Time**
+3. Select your date and time with the calendar picker
+4. Click **Schedule & Close Tab**
 
-### Cancel a Scheduled Tab
+### Undo
 
-1. Click the Tab Scheduler icon
-2. Find the tab you want to cancel in the list
-3. Click the "Cancel" button next to it
+Scheduled a tab by mistake? A confirmation toast appears for 5 seconds with an **Undo** button — click it to cancel the schedule and reopen the tab immediately.
 
-## How It Works
+### Managing Scheduled Tabs
+
+Scroll down in the popup to see all your scheduled tabs. From here you can:
+
+- **Search** — Filter tabs by title
+- **Edit** — Change the scheduled time for any tab
+- **Cancel** — Remove a tab from the schedule
+
+### Batch Opening
+
+When multiple tabs are scheduled for the same time, they all open together in a single window and are grouped under a "Snoozed" tab group — no clutter of multiple windows.
+
+### Settings
+
+Click the gear icon to customize:
+
+- **Theme**: Light, Dark, or follow your system preference
+- **Notifications**: Enable or disable desktop alerts
+- **Badge counter**: Show the number of scheduled tabs on the extension icon
+- **Default shortcut preset**: Choose what `Ctrl+Shift+S` schedules for
+- **Import/Export**: Back up or restore your scheduled tabs as a JSON file
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+.` | Open Tab Scheduler |
+| `Ctrl+Shift+S` | Schedule for tomorrow 9am |
+| `Ctrl+Shift+L` | Schedule for 3 hours from now |
+
+On Mac, use `⌘ Command` instead of `Ctrl`.
+
+## Limitations
+
+- Cannot schedule system tabs (`chrome://`, `about:`, etc.)
+- Reopened tabs open in a new window, not their original position
+- Requires Chrome to be running at the scheduled time — missed tabs open automatically on next browser launch
+
+## Privacy
+
+- All data is stored locally in your browser (`chrome.storage.local`)
+- No external servers, no analytics, no data collection
+- Open source — read the code yourself
+
+See [PRIVACY.md](PRIVACY.md) for full details.
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on setting up the project, code style, and submitting pull requests.
+
+## For Developers
+
+### File Structure
+
+```
+chrome-extension/
+├── manifest.json           # Extension configuration
+├── background.js           # Service worker (alarm handling, context menus)
+├── settings.html           # Settings page UI
+├── settings.js             # Settings page logic
+├── settings.css            # Settings page styling
+├── popup/
+│   ├── popup.html         # Popup UI
+│   ├── popup.css          # Popup styling
+│   └── popup.js           # Popup logic
+├── icons/
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
+└── screenshots/
+```
 
 ### Technical Details
 
-- **Manifest V3**: Uses the latest Chrome extension standard
-- **chrome.alarms API**: Reliable scheduling that persists across browser restarts
-- **chrome.storage.local**: Stores scheduled tab data locally
-- **chrome.windows API**: Creates new windows for reopened tabs
-- **Service Worker**: Runs in background to handle alarms
+- **Manifest V3** service worker architecture
+- **chrome.alarms API** for reliable scheduling across browser restarts
+- **chrome.storage.local** for persistent local data storage
+- **chrome.tabGroups API** for batching simultaneously reopened tabs
+- No external dependencies — pure JavaScript
 
 ### Data Structure
 
-Scheduled tabs are stored in `chrome.storage.local` under the key `scheduledTabs`:
+Scheduled tabs are stored under the key `scheduledTabs` in `chrome.storage.local`:
 
 ```json
 {
@@ -130,110 +208,34 @@ Scheduled tabs are stored in `chrome.storage.local` under the key `scheduledTabs
 }
 ```
 
-## Limitations
+### Debugging
 
-- Cannot schedule system tabs (`chrome://`, `about:`, etc.)
-- Reopened tabs always open in a new window (not original position)
-- Requires browser to be running at scheduled time (or next startup)
-
-## Debugging
-
-### View Service Worker Logs
-
+**Service worker logs:**
 1. Go to `chrome://extensions`
-2. Find "Tab Scheduler"
-3. Click "service worker" link
-4. Opens DevTools with console logs
+2. Find Tab Scheduler → click **service worker**
+3. DevTools opens with the background script console
 
-### View Popup Logs
+**Popup logs:**
+1. Click the extension icon
+2. Right-click the popup → **Inspect**
 
-1. Click extension icon to open popup
-2. Right-click on popup → "Inspect"
-3. Opens DevTools for popup
-
-### Check Storage
-
-In service worker DevTools console:
+**Inspect storage or alarms in the service worker console:**
 ```javascript
 chrome.storage.local.get('scheduledTabs', (data) => console.log(data))
-```
-
-### Check Alarms
-
-In service worker DevTools console:
-```javascript
 chrome.alarms.getAll((alarms) => console.log(alarms))
 ```
 
-## File Structure
+### Permissions
 
-```
-chrome-extension/
-├── manifest.json           # Extension configuration
-├── background.js           # Service worker (alarm handling)
-├── settings.html           # Settings page UI
-├── settings.js             # Settings page logic
-├── settings.css            # Settings page styling
-├── popup/
-│   ├── popup.html         # Popup UI
-│   ├── popup.css          # Popup styling
-│   └── popup.js           # Popup logic
-├── icons/
-│   ├── icon16.png         # 16x16 toolbar icon
-│   ├── icon48.png         # 48x48 notifications
-│   └── icon128.png        # 128x128 store listing
-├── screenshots/           # Extension screenshots
-└── README.md              # This file
-```
-
-## Permissions
-
-The extension requires these permissions:
-
-- **tabs**: Access to tab information (URL, title, favicon)
-- **alarms**: Schedule tab reopening
-- **storage**: Persist scheduled tab data
-- **notifications**: Show desktop notifications
-- **tabGroups**: Group multiple tabs reopening simultaneously
-- **contextMenus**: Right-click context menu for scheduling
-
-## Privacy
-
-- All data stored locally in your browser
-- No external servers or analytics
-- No data collection or tracking
-- Open source - audit the code yourself
-
-## Compatibility
-
-- Chrome 88+ (Manifest V3 support)
-- Also works on Edge, Brave, and other Chromium-based browsers
-
-## Future Enhancements
-
-Potential features for future versions:
-
-- Recurring schedules (daily/weekly)
-- Natural language scheduling ("tomorrow at 9am")
-- Bulk scheduling of multiple tabs
-- Restore tabs in original position
-- Statistics dashboard
-- Browser sync support
+| Permission | Purpose |
+|------------|---------|
+| `tabs` | Read tab URL, title, and favicon |
+| `alarms` | Schedule reliable background timers |
+| `storage` | Persist scheduled tab data locally |
+| `notifications` | Show desktop alerts |
+| `tabGroups` | Group multiple tabs reopening simultaneously |
+| `contextMenus` | Add right-click scheduling menu |
 
 ## License
 
-MIT License - feel free to modify and distribute
-
-## Support
-
-For issues or questions, please check the service worker logs and popup console for error messages.
-
-## Version History
-
-### 1.0.0 (Initial Release)
-- Schedule tabs with date/time picker
-- View scheduled tabs list
-- Cancel scheduled tabs
-- Desktop notifications
-- Persists across browser restarts
-- Handles missed schedules
+MIT — see [LICENSE](LICENSE) for details.
