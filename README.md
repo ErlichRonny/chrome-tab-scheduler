@@ -168,6 +168,9 @@ chrome.alarms.getAll((alarms) => console.log(alarms))
 chrome-extension/
 ├── manifest.json           # Extension configuration
 ├── background.js           # Service worker (alarm handling)
+├── settings.html           # Settings page UI
+├── settings.js             # Settings page logic
+├── settings.css            # Settings page styling
 ├── popup/
 │   ├── popup.html         # Popup UI
 │   ├── popup.css          # Popup styling
@@ -176,6 +179,7 @@ chrome-extension/
 │   ├── icon16.png         # 16x16 toolbar icon
 │   ├── icon48.png         # 48x48 notifications
 │   └── icon128.png        # 128x128 store listing
+├── screenshots/           # Extension screenshots
 └── README.md              # This file
 ```
 
@@ -187,6 +191,8 @@ The extension requires these permissions:
 - **alarms**: Schedule tab reopening
 - **storage**: Persist scheduled tab data
 - **notifications**: Show desktop notifications
+- **tabGroups**: Group multiple tabs reopening simultaneously
+- **contextMenus**: Right-click context menu for scheduling
 
 ## Privacy
 
@@ -210,7 +216,6 @@ Potential features for future versions:
 - Restore tabs in original position
 - Statistics dashboard
 - Browser sync support
-- Tab grouping options
 
 ## License
 

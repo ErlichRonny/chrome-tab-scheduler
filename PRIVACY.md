@@ -145,7 +145,7 @@ Since no data is collected or transmitted:
 
 For privacy questions or concerns:
 - Open an issue: https://github.com/ErlichRonny/chrome-tab-scheduler/issues
-- Email: [Add your email if you want to provide one]
+- Open a GitHub issue at https://github.com/ErlichRonny/chrome-tab-scheduler/issues
 
 ## Legal Compliance
 

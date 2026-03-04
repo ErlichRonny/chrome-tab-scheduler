@@ -115,4 +115,4 @@ Want faster access? Pin the extension:
 
 ---
 
-**Version 1.1.0** - Now with Smart Scheduling! 🎉
+**Version 1.11.0** - Now with Smart Scheduling! 🎉

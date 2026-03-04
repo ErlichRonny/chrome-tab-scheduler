@@ -380,8 +380,6 @@ async function scheduleTabWithTime(scheduledTime) {
       createdAt: now
     };
 
-    console.log('Sending scheduleTab message:', { alarmId, scheduledTime });
-
     // Send message to background script to schedule
     chrome.runtime.sendMessage({
       action: 'scheduleTab',
@@ -395,8 +393,6 @@ async function scheduleTabWithTime(scheduledTime) {
         showError('Failed to schedule: ' + chrome.runtime.lastError.message);
         return;
       }
-
-      console.log('Received scheduleTab response:', response);
 
       try {
         if (!response || !response.success) {
@@ -435,8 +431,6 @@ async function scheduleTabWithTime(scheduledTime) {
 
 // Cancel a scheduled tab
 function cancelScheduledTab(alarmId) {
-  console.log('Sending cancelSchedule message for:', alarmId);
-
   // Send message to background script to cancel
   chrome.runtime.sendMessage({
     action: 'cancelSchedule',
@@ -448,8 +442,6 @@ function cancelScheduledTab(alarmId) {
       showError('Failed to cancel: ' + chrome.runtime.lastError.message);
       return;
     }
-
-    console.log('Received response:', response);
 
     try {
       if (!response || !response.success) {
@@ -466,9 +458,7 @@ function cancelScheduledTab(alarmId) {
         title: 'Schedule Cancelled',
         message: `Cancelled: ${response.tabData?.tabInfo?.title || 'Tab'}`,
         priority: 1
-      }).catch(err => console.warn('Notification failed:', err));
-
-      console.log('Successfully cancelled schedule');
+      }).catch(() => {});
     } catch (error) {
       console.error('Error cancelling scheduled tab:', error);
       console.error('Error stack:', error.stack);
@@ -643,7 +633,6 @@ async function saveCustomPreset(e) {
     // Hide form
     hidePresetForm();
 
-    console.log('Custom preset saved:', preset);
   } catch (error) {
     console.error('Error saving custom preset:', error);
     showError('Failed to save preset');
@@ -711,7 +700,6 @@ async function confirmDelete() {
     // Hide modal
     hideDeleteModal();
 
-    console.log('Custom preset deleted:', presetToDelete);
   } catch (error) {
     console.error('Error confirming deletion:', error);
     showError('Failed to delete preset');
@@ -830,8 +818,6 @@ function confirmEdit(e) {
     scheduledTime: newScheduledTime
   };
 
-  console.log('Sending editSchedule message:', { oldAlarmId, newAlarmId, newScheduledTime });
-
   // Send message to background script to edit schedule
   chrome.runtime.sendMessage({
     action: 'editSchedule',
@@ -846,8 +832,6 @@ function confirmEdit(e) {
       showEditError('Failed to update schedule: ' + chrome.runtime.lastError.message);
       return;
     }
-
-    console.log('Received editSchedule response:', response);
 
     try {
       if (!response || !response.success) {
@@ -867,9 +851,7 @@ function confirmEdit(e) {
         title: 'Schedule Updated',
         message: `"${tabData.tabInfo.title}" will now reopen ${formatScheduledTime(newScheduledTime)}`,
         priority: 1
-      }).catch(err => console.warn('Notification failed:', err));
-
-      console.log('Schedule updated successfully');
+      }).catch(() => {});
     } catch (error) {
       console.error('Error updating schedule:', error);
       console.error('Error stack:', error.stack);
@@ -1101,7 +1083,6 @@ function hideUndoToast() {
 // Undo the last scheduling action
 async function undoSchedule() {
   if (!lastScheduledAction) {
-    console.warn('No action to undo');
     return;
   }
 

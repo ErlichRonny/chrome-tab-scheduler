@@ -19,14 +19,14 @@ Follow these steps to install and test the Tab Scheduler extension:
 ### Step 3: Load the Extension
 
 1. Click the "Load unpacked" button
-2. Navigate to: `/Users/ronnyerlich/src/chrome-extension`
+2. Navigate to: the extension directory
 3. Click "Select" or "Open"
 
 ### Step 4: Verify Installation
 
 You should see:
 - ✅ "Tab Scheduler" appears in the extensions list
-- ✅ Version: 1.0.0
+- ✅ Version: 1.11.0
 - ✅ Status: Enabled (blue toggle)
 - ✅ No errors shown
 - ✅ Extension icon appears in toolbar (may need to pin it)
@@ -63,7 +63,7 @@ Try this quick test to make sure everything works:
 **Problem**: Error when clicking "Load unpacked"
 
 **Solutions**:
-- Verify you selected the correct directory: `/Users/ronnyerlich/src/chrome-extension`
+- Verify you selected the correct directory: the extension directory
 - Check that `manifest.json` exists in that directory
 - Look for error messages and check manifest.json syntax
 
@@ -123,7 +123,6 @@ Try this quick test to make sure everything works:
 Run this command to check all files exist:
 
 ```bash
-cd /Users/ronnyerlich/src/chrome-extension
 ls -la
 ```
 

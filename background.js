@@ -36,7 +36,6 @@ async function updateBadge() {
 
 // On extension install or update
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Tab Scheduler installed/updated');
   reconcileAlarmsAndStorage();
   createContextMenus();
   updateBadge();
@@ -44,15 +43,12 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // On browser startup
 chrome.runtime.onStartup.addListener(() => {
-  console.log('Browser started, reconciling alarms');
   reconcileAlarmsAndStorage();
   updateBadge();
 });
 
 // Main alarm listener - fires when scheduled time is reached
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  console.log('Alarm fired:', alarm.name);
-
   try {
     // Get scheduled tab data from storage
     const result = await chrome.storage.local.get('scheduledTabs');
@@ -60,13 +56,11 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     const tabData = scheduledTabs[alarm.name];
 
     if (!tabData) {
-      console.warn('No tab data found for alarm:', alarm.name);
       return;
     }
 
     // Add to pending queue
     pendingAlarms.push({ alarmId: alarm.name, tabData });
-    console.log(`Added to queue. Total pending: ${pendingAlarms.length}`);
 
     // Clear existing timeout and set new one
     if (batchTimeout) {
@@ -97,8 +91,6 @@ async function processPendingAlarms() {
   if (pendingAlarms.length === 0) {
     return;
   }
-
-  console.log(`Processing ${pendingAlarms.length} pending alarms`);
 
   try {
     // Get current storage
@@ -133,8 +125,6 @@ async function processPendingAlarms() {
 
     } else {
       // Multiple alarms - open in one window with group
-      console.log(`Opening ${alarmsToProcess.length} tabs in one window with group`);
-
       const urls = alarmsToProcess.map(a => a.tabData.tabInfo.url);
 
       // Create window with all URLs
@@ -177,7 +167,6 @@ async function processPendingAlarms() {
 
     // Save updated storage
     await chrome.storage.local.set({ scheduledTabs });
-    console.log('Successfully processed batch');
 
     // Update badge
     await updateBadge();
@@ -228,20 +217,14 @@ async function reconcileAlarmsAndStorage() {
         // Alarm missing - check if past due
         if (tabData.scheduledTime <= now) {
           // Past due - collect for batch processing
-          console.log('Found past-due tab:', tabData.tabInfo.title);
           pastDueTabs.push({ alarmId, tabData });
         } else if (tabData.scheduledTime > now + (24 * 60 * 60 * 1000)) {
           // More than 24 hours in future - might be stale, but recreate alarm
-          console.log('Recreating alarm for:', tabData.tabInfo.title);
           await chrome.alarms.create(alarmId, { when: tabData.scheduledTime });
         } else {
           // Within 24 hours - recreate alarm
-          console.log('Recreating alarm for:', tabData.tabInfo.title);
           await chrome.alarms.create(alarmId, { when: tabData.scheduledTime });
         }
-      } else {
-        // Alarm exists - verify it matches storage
-        console.log('Alarm verified:', alarmId);
       }
     }
 
@@ -253,15 +236,12 @@ async function reconcileAlarmsAndStorage() {
     // Check for orphaned alarms (alarms without storage entries)
     for (const alarm of alarms) {
       if (alarm.name.startsWith('alarm_') && !scheduledTabs[alarm.name]) {
-        console.log('Clearing orphaned alarm:', alarm.name);
         await chrome.alarms.clear(alarm.name);
       }
     }
 
     // Save cleaned storage
     await chrome.storage.local.set({ scheduledTabs });
-
-    console.log('Reconciliation complete. Active schedules:', Object.keys(scheduledTabs).length);
 
     // Update badge
     await updateBadge();
@@ -276,8 +256,6 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
     if (pastDueTabs.length === 1) {
       // Single past-due tab - open in new window (current behavior)
       const { alarmId, tabData } = pastDueTabs[0];
-
-      console.log('Reopening single past-due tab:', tabData.tabInfo.title);
 
       await chrome.windows.create({
         url: tabData.tabInfo.url,
@@ -297,8 +275,6 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
 
     } else if (pastDueTabs.length > 1) {
       // Multiple past-due tabs - open in one window with a group
-      console.log(`Reopening ${pastDueTabs.length} past-due tabs in one window`);
-
       const urls = pastDueTabs.map(t => t.tabData.tabInfo.url);
 
       // Create window with all URLs
@@ -358,8 +334,6 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
 
 // Handle messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Background received message:', message.action);
-
   // Handle async operations properly
   (async () => {
     try {
@@ -370,25 +344,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
 
       if (message.action === 'cancelSchedule') {
-        console.log('Handling cancelSchedule for:', message.alarmId);
         const result = await handleCancelSchedule(message.alarmId);
-        console.log('cancelSchedule result:', result);
         sendResponse(result);
         return;
       }
 
       if (message.action === 'editSchedule') {
-        console.log('Handling editSchedule:', message.oldAlarmId, '->', message.newAlarmId);
         const result = await handleEditSchedule(message.oldAlarmId, message.newAlarmId, message.newScheduledTime, message.tabData);
-        console.log('editSchedule result:', result);
         sendResponse(result);
         return;
       }
 
       if (message.action === 'scheduleTab') {
-        console.log('Handling scheduleTab:', message.alarmId);
         const result = await handleScheduleTab(message.alarmId, message.scheduledTime, message.tabData);
-        console.log('scheduleTab result:', result);
         sendResponse(result);
         return;
       }
@@ -420,8 +388,6 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 
 // Handle keyboard commands
 chrome.commands.onCommand.addListener(async (command) => {
-  console.log('Command received:', command);
-
   if (command === 'quick-schedule-tomorrow') {
     await handleQuickScheduleCommand('tomorrow9am');
   } else if (command === 'quick-schedule-later') {
@@ -505,8 +471,6 @@ async function handleQuickScheduleCommand(preset) {
       message: `"${tab.title}" will reopen ${formatScheduledTimeForNotification(scheduledTime)}`,
       priority: 1
     });
-
-    console.log('Tab scheduled via keyboard shortcut:', tab.title);
 
   } catch (error) {
     console.error('Error in quick schedule command:', error);
@@ -634,7 +598,6 @@ function createContextMenus() {
       });
     });
 
-    console.log('Context menus created');
   });
 }
 
@@ -721,8 +684,6 @@ async function scheduleTabFromContextMenu(tab, presetId) {
 
     // Update badge
     await updateBadge();
-
-    console.log('Tab scheduled from context menu:', tab.title);
 
   } catch (error) {
     console.error('Error scheduling from context menu:', error);
