@@ -36,3 +36,6 @@ build/
 
 # Development tools
 icon-generator.html
+
+# Git worktrees
+.worktrees/
