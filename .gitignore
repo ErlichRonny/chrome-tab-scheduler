@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Development
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+*.sublime-workspace
+*.sublime-project
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (if ever used)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Package files
+*.crx
+*.pem
+*.zip
+
+# Development tools
+icon-generator.html

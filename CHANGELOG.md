@@ -2,6 +2,57 @@
 
 All notable changes to the Tab Scheduler Chrome Extension.
 
+## [1.11.0] - 2026-03-03
+
+### Added - Import/Export & Polish
+
+- **Import/Export Backup Functionality**
+  - Export all scheduled tabs to a JSON backup file
+  - Import previously exported backups to restore scheduled tabs
+  - Merge or replace options when importing
+
+- **Professional UI Polish**
+  - Smooth animations and transitions throughout
+  - Empty state illustrations with helpful prompts
+  - Onboarding flow for first-time users
+  - Loading states and skeleton screens
+
+### Changed
+
+- Bumped version to 1.11.0
+
+---
+
+## [1.10.0] - 2026-03-03
+
+### Added - Settings & Customization
+
+- **Comprehensive Settings Page**
+  - Theme selection (Light, Dark, System)
+  - Animation preferences (enabled/disabled)
+  - Notification settings
+  - Default scheduling presets configuration
+  - Badge count toggle
+
+- **Keyboard Shortcuts**
+  - Quick actions with customizable shortcuts
+  - Keyboard shortcuts help overlay
+  - Cross-platform support (Mac/Windows)
+
+---
+
+## [1.9.0] - 2026-03-03
+
+### Added - Custom Presets
+
+- **Custom Preset Editor**
+  - Create user-defined quick schedule buttons
+  - Set custom time offsets and labels
+  - Reorder, edit, and delete presets
+  - Presets persist across browser restarts
+
+---
+
 ## [1.2.0] - 2026-02-01
 
 ### Added - Grouped Tabs
@@ -169,23 +220,15 @@ All notable changes to the Tab Scheduler Chrome Extension.
 
 ### Potential Features
 
-- More preset options ("In 30 minutes", "Tonight at 8pm", "This weekend")
-- Custom presets (user-defined quick buttons)
 - Recurring schedules ("Every Monday at 9am")
 - Natural language processing ("tomorrow morning", "next Friday")
 - Smart suggestions based on usage patterns
-- Schedule tab groups (multiple tabs together)
 - Restore tabs in original position (not just new window)
-- Export/import scheduled tabs
-- Keyboard shortcuts
 - Statistics dashboard
 - Time zone support
-- Dark mode
 
 ### Version Roadmap
 
-- **v1.2.0** - More presets, custom preset editor
-- **v1.3.0** - Tab groups support
 - **v2.0.0** - Recurring schedules (major architecture change)
 - **v2.1.0** - Natural language parsing
 - **v3.0.0** - Cloud sync, cross-device scheduling
@@ -196,6 +239,10 @@ All notable changes to the Tab Scheduler Chrome Extension.
 
 | Version | Release Date | Key Features |
 |---------|--------------|--------------|
+| 1.11.0  | 2026-03-03   | Import/export backup, UI polish, onboarding |
+| 1.10.0  | 2026-03-03   | Settings page, keyboard shortcuts |
+| 1.9.0   | 2026-03-03   | Custom presets editor |
+| 1.2.0   | 2026-02-01   | Grouped tabs for multiple simultaneous reopens |
 | 1.1.0   | 2026-02-01   | Smart scheduling with quick presets |
 | 1.0.0   | 2026-01-XX   | Initial release with manual scheduling |
 
@@ -205,30 +252,15 @@ All notable changes to the Tab Scheduler Chrome Extension.
 
 This is an open-source project. Contributions welcome!
 
-To contribute:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-## Support
-
-For bug reports and feature requests:
-- Check the service worker console (chrome://extensions)
-- Check the popup console (right-click popup → Inspect)
-- Review TESTING.md for common issues
-- File an issue on GitHub (if applicable)
-
----
-
-**Current Version**: 1.1.0 (Smart Scheduling)
-**Last Updated**: 2026-02-01
+**Current Version**: 1.11.0
+**Last Updated**: 2026-03-03

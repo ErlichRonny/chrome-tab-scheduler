@@ -1,18 +1,51 @@
+<div align="center">
+
 # Tab Scheduler Chrome Extension
 
-A Chrome extension that allows you to schedule tabs to reopen at a specific date and time. Schedule a tab, it closes immediately, then reopens as a new window at the scheduled time.
+![Tab Scheduler Logo](icons/icon128.png)
+
+**Schedule browser tabs to reopen at any future time**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
+[![Version](https://img.shields.io/badge/version-1.11.0-green.svg)](https://github.com/ErlichRonny/chrome-tab-scheduler/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/ErlichRonny/chrome-tab-scheduler?style=social)](https://github.com/ErlichRonny/chrome-tab-scheduler/stargazers)
+
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Contributing](#contributing)
+
+</div>
+
+---
+
+## Screenshots
+
+<table>
+<tr>
+<td><img src="screenshots/main-popup.png" alt="Main Popup" width="400"/><br/><em>Quick schedule buttons</em></td>
+<td><img src="screenshots/scheduled-tabs.png" alt="Scheduled Tabs" width="400"/><br/><em>Manage scheduled tabs</em></td>
+</tr>
+<tr>
+<td><img src="screenshots/settings.png" alt="Settings" width="400"/><br/><em>Customization options</em></td>
+<td><img src="screenshots/custom-presets.png" alt="Custom Presets" width="400"/><br/><em>Create your own presets</em></td>
+</tr>
+</table>
+
+> **Note**: Screenshots will be added soon. See [screenshots/README.md](screenshots/README.md) for details.
 
 ## Features
 
-- 📅 Schedule any tab to reopen at a future date/time
-- ⚡ **Smart Scheduling**: Quick buttons for "Tomorrow 9am", "In 1 hour", "Next Monday", etc.
-- 🗓️ **Calendar Picker**: Visual date/time picker for custom scheduling
+- 📅 **Schedule Tabs**: Schedule any tab to reopen at a future date/time
+- ⚡ **Smart Presets**: Quick buttons for "Tomorrow 9am", "In 1 hour", "Next Monday", etc.
+- 🎨 **Custom Presets**: Create your own scheduling presets with custom times and labels
+- 🗓️ **Calendar Picker**: Visual date/time picker for precise scheduling
 - 📂 **Grouped Tabs**: Multiple tabs opening together (within 2 seconds) open in one window, grouped as "Snoozed"
-- 🔔 Desktop notifications when tabs are scheduled and reopened
-- 📋 View and manage all scheduled tabs
-- 💾 Persists across browser restarts
-- ⏰ Handles missed schedules (reopens on next browser start)
-- 🎯 Clean, modern UI matching Chrome's design language
+- 🔔 **Desktop Notifications**: Get notified when tabs are scheduled and reopened
+- 📋 **Manage Schedule**: View, search, edit, and cancel all scheduled tabs
+- ⌨️ **Keyboard Shortcuts**: Quick actions with customizable keyboard shortcuts
+- ⚙️ **Settings & Customization**: Themes, animations, notification preferences, and more
+- 💾 **Import/Export**: Backup and restore your scheduled tabs
+- 🔄 **Persistent & Reliable**: Works across browser restarts and handles missed schedules
+- 🎯 **Clean, Modern UI**: Professional design with smooth animations and empty states
 
 ## Installation
 
@@ -22,7 +55,7 @@ A Chrome extension that allows you to schedule tabs to reopen at a specific date
 2. Open Chrome and navigate to `chrome://extensions`
 3. Enable "Developer mode" (toggle in top-right corner)
 4. Click "Load unpacked"
-5. Select the `/Users/ronnyerlich/src/chrome-extension` directory
+5. Select the extension directory (the folder containing manifest.json)
 6. The extension icon should appear in your toolbar
 
 ## Usage
@@ -175,9 +208,9 @@ Potential features for future versions:
 - Natural language scheduling ("tomorrow at 9am")
 - Bulk scheduling of multiple tabs
 - Restore tabs in original position
-- Export/import scheduled tabs
-- Keyboard shortcuts
 - Statistics dashboard
+- Browser sync support
+- Tab grouping options
 
 ## License
 
