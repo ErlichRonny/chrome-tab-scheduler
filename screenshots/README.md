@@ -10,6 +10,7 @@ Screenshots will be added here once the extension UI is finalized.
 | `scheduled-tabs.png` | Manage scheduled tabs view |
 | `settings.png` | Settings and customization options |
 | `custom-presets.png` | Custom preset editor |
+| `dark-mode.png` | Main popup or scheduled tabs view in dark mode |
 
 ## How to Take Screenshots
 

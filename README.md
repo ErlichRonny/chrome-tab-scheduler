@@ -28,6 +28,9 @@
 <td><img src="screenshots/settings.png" alt="Settings" width="400"/><br/><em>Customization options</em></td>
 <td><img src="screenshots/custom-presets.png" alt="Custom Presets" width="400"/><br/><em>Create your own presets</em></td>
 </tr>
+<tr>
+<td><img src="screenshots/dark-mode.png" alt="Dark Mode" width="400"/><br/><em>Dark mode support</em></td>
+</tr>
 </table>
 
 > **Note**: Screenshots will be added soon. See [screenshots/README.md](screenshots/README.md) for details.
