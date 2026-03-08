@@ -2,6 +2,22 @@
 
 All notable changes to the Tab Scheduler Chrome Extension.
 
+## [1.12.0] - 2026-03-03
+
+### Added - Recurring Schedules
+
+- **Recurring tab support**: Schedule tabs to reopen on a repeating pattern
+  - Daily, Weekdays (Mon–Fri), Weekly, or Custom days of the week
+  - Runs forever or until a specified end date
+  - Toggle inline in the popup — no extra screens
+  - Recurring tabs show 🔁 badge in the scheduled list
+  - Notification includes next recurrence time
+  - Missed recurrences open once on browser restart, then schedule next future occurrence
+
+### Changed
+
+- Bumped version to 1.12.0
+
 ## [1.11.0] - 2026-03-03
 
 ### Added - Import/Export & Polish
