@@ -303,8 +303,26 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
         priority: 1
       });
 
-      // Clean up
-      delete scheduledTabs[alarmId];
+      // If recurring, schedule next future occurrence
+      if (tabData.recurrence) {
+        let nextTime = calculateNextOccurrence(tabData.recurrence, tabData.scheduledTime);
+        // Keep advancing until we find a future occurrence
+        while (nextTime && nextTime <= Date.now()) {
+          nextTime = calculateNextOccurrence(tabData.recurrence, nextTime);
+        }
+        if (nextTime) {
+          const randomId = Math.random().toString(36).substring(2, 8);
+          const newAlarmId = `alarm_${nextTime}_${randomId}`;
+          const newTabData = { ...tabData, alarmId: newAlarmId, scheduledTime: nextTime };
+          delete scheduledTabs[alarmId];
+          scheduledTabs[newAlarmId] = newTabData;
+          await chrome.alarms.create(newAlarmId, { when: nextTime });
+        } else {
+          delete scheduledTabs[alarmId];
+        }
+      } else {
+        delete scheduledTabs[alarmId];
+      }
 
     } else if (pastDueTabs.length > 1) {
       // Multiple past-due tabs - open in one window with a group
@@ -342,9 +360,26 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
         priority: 1
       });
 
-      // Clean up all past-due tabs from storage
-      for (const { alarmId } of pastDueTabs) {
-        delete scheduledTabs[alarmId];
+      // Clean up all past-due tabs; reschedule recurring ones
+      for (const { alarmId, tabData } of pastDueTabs) {
+        if (tabData.recurrence) {
+          let nextTime = calculateNextOccurrence(tabData.recurrence, tabData.scheduledTime);
+          while (nextTime && nextTime <= Date.now()) {
+            nextTime = calculateNextOccurrence(tabData.recurrence, nextTime);
+          }
+          if (nextTime) {
+            const randomId = Math.random().toString(36).substring(2, 8);
+            const newAlarmId = `alarm_${nextTime}_${randomId}`;
+            const newTabData = { ...tabData, alarmId: newAlarmId, scheduledTime: nextTime };
+            delete scheduledTabs[alarmId];
+            scheduledTabs[newAlarmId] = newTabData;
+            await chrome.alarms.create(newAlarmId, { when: nextTime });
+          } else {
+            delete scheduledTabs[alarmId];
+          }
+        } else {
+          delete scheduledTabs[alarmId];
+        }
       }
     }
   } catch (error) {
