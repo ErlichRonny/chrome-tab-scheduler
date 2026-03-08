@@ -128,7 +128,9 @@ function createScheduledTabItem(alarmId, tabData) {
 
   const time = document.createElement('div');
   time.className = 'scheduled-time';
-  const recurBadge = tabData.recurrence ? '<span class="recurrence-badge">🔁</span>' : '';
+  const recurBadge = tabData.recurrence
+    ? `<span class="recurrence-badge" title="${formatRecurrenceDescription(tabData.recurrence)}">🔁</span>`
+    : '';
   time.innerHTML = formatScheduledTime(tabData.scheduledTime) + recurBadge;
 
   info.appendChild(title);
@@ -1216,4 +1218,25 @@ function getRecurrenceData(scheduledTime) {
   const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
   return { pattern, days, time, endDate };
+}
+
+// Build a human-readable description of a recurrence config for tooltip display
+function formatRecurrenceDescription(recurrence) {
+  const { pattern, days, endDate } = recurrence;
+  const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  let patternStr;
+  switch (pattern) {
+    case 'daily':    patternStr = 'Repeats daily'; break;
+    case 'weekdays': patternStr = 'Repeats weekdays (Mon–Fri)'; break;
+    case 'weekly':   patternStr = 'Repeats weekly'; break;
+    case 'custom':   patternStr = 'Repeats on ' + days.map(d => DAY_NAMES[d]).join(', '); break;
+    default:         patternStr = 'Repeats';
+  }
+
+  const endStr = endDate
+    ? 'until ' + new Date(endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'no end date';
+
+  return `${patternStr} · ${endStr}`;
 }

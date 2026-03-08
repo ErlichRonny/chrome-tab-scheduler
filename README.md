@@ -47,6 +47,7 @@ Found an article you want to read at lunch? A recipe to try this weekend? A GitH
 - 📂 **Batch Opening**: Multiple tabs scheduled for the same time open together in one grouped window
 - 🔔 **Notifications**: Desktop alerts when tabs are scheduled and when they reopen
 - ⚙️ **Settings**: Light/dark/system theme, notification preferences, badge counter, and more
+- 🔁 **Recurring Schedules**: Repeat a tab daily, on weekdays, weekly, or on custom days — forever or until an end date
 - 💾 **Import/Export**: Back up and restore your scheduled tabs as JSON
 - 🔄 **Reliable**: Works across browser restarts — missed schedules open automatically on next launch
 
@@ -104,6 +105,22 @@ For a specific moment:
 2. Scroll to **Or Pick Custom Time**
 3. Select your date and time with the calendar picker
 4. Click **Schedule & Close Tab**
+
+### Recurring Schedules
+
+To have a tab reopen on a repeating schedule:
+
+1. Scroll to **Or Pick Custom Time** and set your date and time
+2. Toggle on **🔁 Repeat**
+3. Choose a pattern:
+   - **Daily** — reopens every day at the same time
+   - **Weekdays** — reopens Monday through Friday
+   - **Weekly** — reopens once a week on the same day
+   - **Custom** — pick specific days of the week (e.g. Mon, Wed, Fri)
+4. Optionally set an **End on** date — leave it as "Never" to repeat indefinitely
+5. Click **Schedule & Close Tab**
+
+Recurring tabs show a 🔁 badge next to their time in the scheduled list. Hover over the badge to see the full schedule (e.g. "Repeats weekdays (Mon–Fri) · no end date").
 
 ### Undo
 
@@ -203,10 +220,18 @@ Scheduled tabs are stored under the key `scheduledTabs` in `chrome.storage.local
       "title": "Example Page",
       "favIconUrl": "https://example.com/favicon.ico"
     },
-    "createdAt": 1738366800000
+    "createdAt": 1738366800000,
+    "recurrence": {
+      "pattern": "weekdays",
+      "days": [],
+      "time": "09:00",
+      "endDate": null
+    }
   }
 }
 ```
+
+The `recurrence` field is optional (absent for one-time tabs). `pattern` is one of `"daily"`, `"weekdays"`, `"weekly"`, or `"custom"`. For `"custom"` and `"weekly"`, `days` holds the day-of-week numbers (0 = Sunday). `endDate` is a Unix timestamp or `null` for no end.
 
 ### Debugging
 
