@@ -11,7 +11,7 @@
 [![Version](https://img.shields.io/badge/version-1.12.0-green.svg)](https://github.com/ErlichRonny/chrome-tab-scheduler/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/ErlichRonny/chrome-tab-scheduler?style=social)](https://github.com/ErlichRonny/chrome-tab-scheduler/stargazers)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Keyboard Shortcuts](#keyboard-shortcuts) • [Contributing](#contributing)
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Keyboard Shortcuts](#keyboard-shortcuts)
 
 </div>
 
@@ -168,87 +168,16 @@ On Mac, use `⌘ Command` instead of `Ctrl`.
 
 - All data is stored locally in your browser (`chrome.storage.local`)
 - No external servers, no analytics, no data collection
-- Open source — read the code yourself
 
 See [PRIVACY.md](PRIVACY.md) for full details.
 
-## Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on setting up the project, code style, and submitting pull requests.
-
-## For Developers
-
-### File Structure
-
-```
-chrome-extension/
-├── manifest.json           # Extension configuration
-├── background.js           # Service worker (alarm handling, context menus)
-├── settings.html           # Settings page UI
-├── settings.js             # Settings page logic
-├── settings.css            # Settings page styling
-├── popup/
-│   ├── popup.html         # Popup UI
-│   ├── popup.css          # Popup styling
-│   └── popup.js           # Popup logic
-├── icons/
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png
-└── screenshots/
-```
-
-### Technical Details
+## Technical Details
 
 - **Manifest V3** service worker architecture
 - **chrome.alarms API** for reliable scheduling across browser restarts
 - **chrome.storage.local** for persistent local data storage
 - **chrome.tabGroups API** for batching simultaneously reopened tabs
 - No external dependencies — pure JavaScript
-
-### Data Structure
-
-Scheduled tabs are stored under the key `scheduledTabs` in `chrome.storage.local`:
-
-```json
-{
-  "alarm_1738453200000_abc123": {
-    "alarmId": "alarm_1738453200000_abc123",
-    "scheduledTime": 1738453200000,
-    "tabInfo": {
-      "url": "https://example.com",
-      "title": "Example Page",
-      "favIconUrl": "https://example.com/favicon.ico"
-    },
-    "createdAt": 1738366800000,
-    "recurrence": {
-      "pattern": "weekdays",
-      "days": [],
-      "time": "09:00",
-      "endDate": null
-    }
-  }
-}
-```
-
-The `recurrence` field is optional (absent for one-time tabs). `pattern` is one of `"daily"`, `"weekdays"`, `"weekly"`, or `"custom"`. For `"custom"` and `"weekly"`, `days` holds the day-of-week numbers (0 = Sunday). `endDate` is a Unix timestamp or `null` for no end.
-
-### Debugging
-
-**Service worker logs:**
-1. Go to `chrome://extensions`
-2. Find Tab Scheduler → click **service worker**
-3. DevTools opens with the background script console
-
-**Popup logs:**
-1. Click the extension icon
-2. Right-click the popup → **Inspect**
-
-**Inspect storage or alarms in the service worker console:**
-```javascript
-chrome.storage.local.get('scheduledTabs', (data) => console.log(data))
-chrome.alarms.getAll((alarms) => console.log(alarms))
-```
 
 ### Permissions
 
