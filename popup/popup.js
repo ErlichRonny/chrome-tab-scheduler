@@ -128,7 +128,8 @@ function createScheduledTabItem(alarmId, tabData) {
 
   const time = document.createElement('div');
   time.className = 'scheduled-time';
-  time.textContent = formatScheduledTime(tabData.scheduledTime);
+  const recurBadge = tabData.recurrence ? '<span class="recurrence-badge">🔁</span>' : '';
+  time.innerHTML = formatScheduledTime(tabData.scheduledTime) + recurBadge;
 
   info.appendChild(title);
   info.appendChild(time);
@@ -246,6 +247,8 @@ function setupEventListeners() {
 
   // Undo button
   document.getElementById('undoButton').addEventListener('click', undoSchedule);
+
+  setupRecurrenceListeners();
 }
 
 // Set minimum datetime to current time + 1 minute
@@ -369,6 +372,7 @@ async function scheduleTabWithTime(scheduledTime) {
     const alarmId = `alarm_${scheduledTime}_${randomId}`;
 
     // Prepare tab data
+    const recurrence = getRecurrenceData(scheduledTime);
     const tabData = {
       alarmId: alarmId,
       scheduledTime: scheduledTime,
@@ -379,6 +383,7 @@ async function scheduleTabWithTime(scheduledTime) {
       },
       createdAt: now
     };
+    if (recurrence) tabData.recurrence = recurrence;
 
     // Send message to background script to schedule
     chrome.runtime.sendMessage({
@@ -1135,4 +1140,80 @@ async function undoSchedule() {
     console.error('Error undoing schedule:', error);
     showError('Failed to undo: ' + error.message);
   }
+}
+
+// ============================================================
+// Recurrence Panel Logic
+// ============================================================
+
+function setupRecurrenceListeners() {
+  const toggle = document.getElementById('recurrenceToggle');
+  const panel = document.getElementById('recurrencePanel');
+  const daysRow = document.getElementById('recurrenceDaysRow');
+  const endDateInput = document.getElementById('recurrenceEndDate');
+
+  // Show/hide panel when toggle changes
+  toggle.addEventListener('change', () => {
+    panel.style.display = toggle.checked ? 'flex' : 'none';
+  });
+
+  // Show/hide custom days row based on pattern selection
+  document.querySelectorAll('input[name="recurrencePattern"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      daysRow.style.display = radio.value === 'custom' ? 'flex' : 'none';
+    });
+  });
+
+  // Toggle day pill selection
+  document.querySelectorAll('.day-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      pill.classList.toggle('selected');
+    });
+  });
+
+  // Show/hide end date input based on end selection
+  document.querySelectorAll('input[name="recurrenceEnd"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      endDateInput.style.display = radio.value === 'date' ? 'inline-block' : 'none';
+    });
+  });
+}
+
+// Read recurrence fields from panel; returns null if toggle is off
+function getRecurrenceData(scheduledTime) {
+  const toggle = document.getElementById('recurrenceToggle');
+  if (!toggle.checked) return null;
+
+  const pattern = document.querySelector('input[name="recurrencePattern"]:checked').value;
+
+  // Collect selected days for custom pattern
+  let days = [];
+  if (pattern === 'custom') {
+    document.querySelectorAll('.day-pill.selected').forEach(pill => {
+      days.push(parseInt(pill.dataset.day));
+    });
+    if (days.length === 0) {
+      // Default to the day of the scheduled date if nothing selected
+      days = [new Date(scheduledTime).getDay()];
+    }
+  } else if (pattern === 'weekly') {
+    // For weekly, store the day of week derived from the scheduled date
+    days = [new Date(scheduledTime).getDay()];
+  }
+
+  // End date
+  const endRadio = document.querySelector('input[name="recurrenceEnd"]:checked').value;
+  let endDate = null;
+  if (endRadio === 'date') {
+    const dateVal = document.getElementById('recurrenceEndDate').value;
+    if (dateVal) {
+      endDate = new Date(dateVal + 'T23:59:59').getTime();
+    }
+  }
+
+  // Extract time as HH:MM from the scheduled timestamp
+  const d = new Date(scheduledTime);
+  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+  return { pattern, days, time, endDate };
 }

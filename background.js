@@ -112,16 +112,35 @@ async function processPendingAlarms() {
         focused: true
       });
 
+      const nextTime = tabData.recurrence
+        ? calculateNextOccurrence(tabData.recurrence, tabData.scheduledTime)
+        : null;
+      const notifMessage = nextTime
+        ? `Reopened: ${tabData.tabInfo.title} — repeats ${formatScheduledTimeForNotification(nextTime)}`
+        : `Reopened: ${tabData.tabInfo.title}`;
       await chrome.notifications.create({
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'Tab Reopened',
-        message: `Reopened: ${tabData.tabInfo.title}`,
+        message: notifMessage,
         priority: 1
       });
 
-      // Clean up
-      delete scheduledTabs[alarmId];
+      // If recurring, reschedule; otherwise delete
+      if (tabData.recurrence) {
+        if (nextTime) {
+          const randomId = Math.random().toString(36).substring(2, 8);
+          const newAlarmId = `alarm_${nextTime}_${randomId}`;
+          const newTabData = { ...tabData, alarmId: newAlarmId, scheduledTime: nextTime };
+          delete scheduledTabs[alarmId];
+          scheduledTabs[newAlarmId] = newTabData;
+          await chrome.alarms.create(newAlarmId, { when: nextTime });
+        } else {
+          delete scheduledTabs[alarmId];
+        }
+      } else {
+        delete scheduledTabs[alarmId];
+      }
 
     } else {
       // Multiple alarms - open in one window with group
@@ -159,9 +178,23 @@ async function processPendingAlarms() {
         priority: 1
       });
 
-      // Clean up all
-      for (const { alarmId } of alarmsToProcess) {
-        delete scheduledTabs[alarmId];
+      // Clean up all; reschedule recurring ones
+      for (const { alarmId, tabData } of alarmsToProcess) {
+        if (tabData.recurrence) {
+          const nextTime = calculateNextOccurrence(tabData.recurrence, tabData.scheduledTime);
+          if (nextTime) {
+            const randomId = Math.random().toString(36).substring(2, 8);
+            const newAlarmId = `alarm_${nextTime}_${randomId}`;
+            const newTabData = { ...tabData, alarmId: newAlarmId, scheduledTime: nextTime };
+            delete scheduledTabs[alarmId];
+            scheduledTabs[newAlarmId] = newTabData;
+            await chrome.alarms.create(newAlarmId, { when: nextTime });
+          } else {
+            delete scheduledTabs[alarmId];
+          }
+        } else {
+          delete scheduledTabs[alarmId];
+        }
       }
     }
 
@@ -270,8 +303,26 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
         priority: 1
       });
 
-      // Clean up
-      delete scheduledTabs[alarmId];
+      // If recurring, schedule next future occurrence
+      if (tabData.recurrence) {
+        let nextTime = calculateNextOccurrence(tabData.recurrence, tabData.scheduledTime);
+        // Keep advancing until we find a future occurrence
+        while (nextTime && nextTime <= Date.now()) {
+          nextTime = calculateNextOccurrence(tabData.recurrence, nextTime);
+        }
+        if (nextTime) {
+          const randomId = Math.random().toString(36).substring(2, 8);
+          const newAlarmId = `alarm_${nextTime}_${randomId}`;
+          const newTabData = { ...tabData, alarmId: newAlarmId, scheduledTime: nextTime };
+          delete scheduledTabs[alarmId];
+          scheduledTabs[newAlarmId] = newTabData;
+          await chrome.alarms.create(newAlarmId, { when: nextTime });
+        } else {
+          delete scheduledTabs[alarmId];
+        }
+      } else {
+        delete scheduledTabs[alarmId];
+      }
 
     } else if (pastDueTabs.length > 1) {
       // Multiple past-due tabs - open in one window with a group
@@ -309,9 +360,26 @@ async function reopenPastDueTabs(pastDueTabs, scheduledTabs) {
         priority: 1
       });
 
-      // Clean up all past-due tabs from storage
-      for (const { alarmId } of pastDueTabs) {
-        delete scheduledTabs[alarmId];
+      // Clean up all past-due tabs; reschedule recurring ones
+      for (const { alarmId, tabData } of pastDueTabs) {
+        if (tabData.recurrence) {
+          let nextTime = calculateNextOccurrence(tabData.recurrence, tabData.scheduledTime);
+          while (nextTime && nextTime <= Date.now()) {
+            nextTime = calculateNextOccurrence(tabData.recurrence, nextTime);
+          }
+          if (nextTime) {
+            const randomId = Math.random().toString(36).substring(2, 8);
+            const newAlarmId = `alarm_${nextTime}_${randomId}`;
+            const newTabData = { ...tabData, alarmId: newAlarmId, scheduledTime: nextTime };
+            delete scheduledTabs[alarmId];
+            scheduledTabs[newAlarmId] = newTabData;
+            await chrome.alarms.create(newAlarmId, { when: nextTime });
+          } else {
+            delete scheduledTabs[alarmId];
+          }
+        } else {
+          delete scheduledTabs[alarmId];
+        }
       }
     }
   } catch (error) {
@@ -737,6 +805,64 @@ function calculatePresetTimeForContextMenu(presetId) {
   }
 
   return targetDate.getTime();
+}
+
+// ============================================================
+// Recurrence Logic
+// ============================================================
+
+// Given a recurrence config and the time that just fired, return
+// the next occurrence timestamp. Returns null if past end date.
+function calculateNextOccurrence(recurrence, fromTime) {
+  const { pattern, days, time, endDate } = recurrence;
+  const [hours, minutes] = time.split(':').map(Number);
+
+  // Start from the day after fromTime
+  const base = new Date(fromTime);
+  base.setHours(hours, minutes, 0, 0);
+
+  let next = new Date(base);
+
+  switch (pattern) {
+    case 'daily':
+      next.setDate(next.getDate() + 1);
+      break;
+
+    case 'weekdays': {
+      // Advance until we land on Mon-Fri
+      next.setDate(next.getDate() + 1);
+      while (next.getDay() === 0 || next.getDay() === 6) {
+        next.setDate(next.getDate() + 1);
+      }
+      break;
+    }
+
+    case 'weekly':
+      next.setDate(next.getDate() + 7);
+      break;
+
+    case 'custom': {
+      if (!days || days.length === 0) return null;
+      // Find the soonest day-of-week in `days` strictly after today
+      next.setDate(next.getDate() + 1);
+      let attempts = 0;
+      while (!days.includes(next.getDay())) {
+        next.setDate(next.getDate() + 1);
+        if (++attempts > 7) return null; // safety
+      }
+      break;
+    }
+
+    default:
+      return null;
+  }
+
+  const nextTime = next.getTime();
+
+  // Check end date
+  if (endDate && nextTime > endDate) return null;
+
+  return nextTime;
 }
 
 // Check if URL is invalid for scheduling
