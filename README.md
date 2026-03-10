@@ -7,8 +7,7 @@
 **Snooze any browser tab and have it reopen exactly when you need it**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
-[![Version](https://img.shields.io/badge/version-1.12.0-green.svg)](https://github.com/ErlichRonny/chrome-tab-scheduler/releases)
+[![Version](https://img.shields.io/badge/version-1.12.0-green.svg)](https://github.com/ErlichRonny/chrome-tab-scheduler)
 [![GitHub Stars](https://img.shields.io/github/stars/ErlichRonny/chrome-tab-scheduler?style=social)](https://github.com/ErlichRonny/chrome-tab-scheduler/stargazers)
 
 [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Keyboard Shortcuts](#keyboard-shortcuts)
@@ -148,16 +147,6 @@ Click the gear icon to customize:
 - **Default shortcut preset**: Choose what `Ctrl+Shift+S` schedules for
 - **Import/Export**: Back up or restore your scheduled tabs as a JSON file
 
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+Shift+.` | Open Tab Scheduler |
-| `Ctrl+Shift+S` | Schedule for tomorrow 9am |
-| `Ctrl+Shift+L` | Schedule for 3 hours from now |
-
-On Mac, use `⌘ Command` instead of `Ctrl`.
-
 ## Limitations
 
 - Cannot schedule system tabs (`chrome://`, `about:`, etc.)
@@ -178,17 +167,6 @@ See [PRIVACY.md](PRIVACY.md) for full details.
 - **chrome.storage.local** for persistent local data storage
 - **chrome.tabGroups API** for batching simultaneously reopened tabs
 - No external dependencies — pure JavaScript
-
-### Permissions
-
-| Permission | Purpose |
-|------------|---------|
-| `tabs` | Read tab URL, title, and favicon |
-| `alarms` | Schedule reliable background timers |
-| `storage` | Persist scheduled tab data locally |
-| `notifications` | Show desktop alerts |
-| `tabGroups` | Group multiple tabs reopening simultaneously |
-| `contextMenus` | Add right-click scheduling menu |
 
 ## License
 
